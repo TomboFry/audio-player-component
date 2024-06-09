@@ -27,6 +27,7 @@ jobs:
         npm run build
         npm run build:min
         cp README.md dist/README.md
+        cp -r images dist/images
     - name: 🚀 Deploy
       uses: JamesIves/github-pages-deploy-action@v4
       with:

@@ -1,12 +1,16 @@
 # Tombo's \<audio-player\> Web Component
 
+A super-basic web component that wraps around the Audio API to make a nice looking player with album art and simple metadata.
+
 ## Usage
 
-Add this script to whichever page you're adding a player to:
+First, add this script to whichever page you're adding a player to. It'll load the web component.
 
 ```html
 <script type="text/javascript" src="//tombofry.github.io/audio-player-component/audio-player-component.min.js" defer></script>
 ```
+
+### Default style
 
 Then, use the web-component:
 
@@ -14,13 +18,21 @@ Then, use the web-component:
 <audio-player title="Floating Amongst the Stars" artist="TomboFry" sources="/song-url.opus,/song-url.caf" image="/image-url.jpg" min-height="500"></audio-player>
 ```
 
+![](images/screenshot-default.jpg)
+
+### Compact
+
 A compact player doesn't require anything except a list of sources:
 
 ```html
 <audio-player sources="/song-url.mp3" compact dark></audio-player>
 ```
 
-You can provide the following options:
+![](images/screenshot-compact-dark.png)
+
+## Options
+
+You can provide the following attributes to the audio player:
 
 * `title` (optional) The audio track's title
 * `artist` (optional) The audio track's artist
