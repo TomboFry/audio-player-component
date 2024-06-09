@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "main": "index.js",
   "scripts": {
+    "build": "esbuild audio-player-component.ts --platform=browser --bundle --outfile=dist/audio-player-component.js",
+    "build:min": "npm run build -- --minify-syntax --minify-identifiers --outfile=dist/audio-player-component.min.js",
+    "lint": "biome check audio-player-component.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
