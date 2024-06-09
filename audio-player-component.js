@@ -18,13 +18,14 @@
     #songImage;
     #isCompact;
     #isBlurred;
+    #isDark;
     #minHeight;
     #colour;
     #audio = document.createElement("audio");
     #isPlaying = false;
     #shadow;
     static get observedAttributes() {
-      return ["title", "artist", "image", "compact", "blurred", "min-height", "sources", "colour"];
+      return ["title", "artist", "image", "compact", "blurred", "min-height", "sources", "colour", "dark"];
     }
     static get svgPlay() {
       return '<svg xmlns="https://www.w3.org/2000/svg" width="24" height="24" viewBox="-1 0 23 24"><title>Play</title><polygon class="icon-play" points="19.05 12 6 3.36 6 20.64 19.05 12"/></svg>';
@@ -40,6 +41,7 @@
       this.#songImage = this.getAttribute("image") || "";
       this.#isCompact = this.getAttribute("compact") !== null;
       this.#isBlurred = this.getAttribute("blurred") !== "false" || !(this.#songTitle && this.#songArtist);
+      this.#isDark = this.getAttribute("dark") !== null;
       this.#colour = this.getAttribute("colour") || "#3FA9F5";
       const minHeight = Number(this.getAttribute("min-height") ?? 280);
       this.#minHeight = Number.isSafeInteger(minHeight) ? minHeight : 280;
@@ -137,33 +139,49 @@
 
 		.tap--controls {
 			display: flex;
-			background-color: #f9f9f9;
+			background-color: var(--audio-player-controls-bg);
 			border-radius: 32px;
 			height: 64px;
 			align-items: center;
 			box-shadow: 0 2px 16px rgba(0, 0, 0, 0.25);
+
+			--audio-player-controls-bg: #f9f9f9;
+			--audio-player-button: #fff;
+			--audio-player-button-hover: #f9f9f9;
+			--audio-player-border: #999;
+			--audio-player-border-hover: #666;
+			--audio-player-progress: #f0f0f0;
+			--audio-player-text: #333;
+		}
+		.tap--controls.dark {
+			--audio-player-controls-bg: #222;
+			--audio-player-button: #333;
+			--audio-player-button-hover: #555;
+			--audio-player-border: #aaa;
+			--audio-player-border-hover: #bbb;
+			--audio-player-progress: #555;
+			--audio-player-text: #fff;
 		}
 
 		.tap--button {
 			cursor: pointer;
-			border: 0;
 			font-size: 24px;
 			border-radius: 24px;
 			width: 48px;
 			height: 48px;
 			position: relative;
-			background-color: #fff;
 			margin-left: 8px;
+			background-color: var(--audio-player-button);
 		}
 
 		.tap--button:hover {
-			background-color: #f9f9f9;
-			border: 2px solid #666;
+			border: 2px solid var(--audio-player-border-hover);
+			background-color: var(--audio-player-button-hover);
 		}
 
 		.tap--button,
 		.tap--progress--bar {
-			border: 2px solid #999;
+			border: 2px solid var(--audio-player-border);
 		}
 
 		.tap--button svg {
@@ -172,13 +190,13 @@
 			left: 12.5%;
 			width: 75%;
 			height: 75%;
-			fill: #333;
+			fill: var(--audio-player-text);
 		}
 
 		.tap--progress--bar {
 			flex: 1;
 			height: 24px;
-			background-color: #f0f0f0;
+			background-color: var(--audio-player-progress);
 			border-radius: 12px;
 			margin: 0 12px;
 			cursor: pointer;
@@ -205,7 +223,7 @@
 			font-weight: 700;
 			font-family: monospace;
 			margin-right: 16px;
-			color: #333;
+			color: var(--audio-player-text);
 			user-select: none;
 		}
 
@@ -253,11 +271,10 @@
     }
     createPlayer() {
       const container = _AudioPlayer.createElement({ className: "tap--container" });
-      if (!this.#isCompact) {
-        container.style.minHeight = `${this.#minHeight}px`;
-      }
+      if (!this.#isCompact) container.style.minHeight = `${this.#minHeight}px`;
       this.addOverlayToContainer(container);
       const controls = _AudioPlayer.createElement({ className: "tap--controls" });
+      if (this.#isDark) controls.classList.add("dark");
       const progressBar = _AudioPlayer.createElement({ className: "tap--progress--bar" });
       const progressPlayhead = _AudioPlayer.createElement({ className: "tap--progress--playhead" });
       const progressText = _AudioPlayer.createElement({ className: "tap--progress--timestamp" });
