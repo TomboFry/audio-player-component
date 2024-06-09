@@ -1,0 +1,14 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"strict": false,
+		"declaration": true,
+		"removeComments": true,
+		"noImplicitOverride": true,
+		"outDir": "./dist",
+		"rootDir": "./",
+	},
+	"include": [
+		"audio-player-component.ts",
+	]
+}
