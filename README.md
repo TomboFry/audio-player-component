@@ -17,7 +17,7 @@ Then, use the web-component:
 A compact player doesn't require anything except a list of sources:
 
 ```html
-<audio-player sources="/song-url.mp3" compact></audio-player>
+<audio-player sources="/song-url.mp3" compact dark></audio-player>
 ```
 
 You can provide the following options:
@@ -34,5 +34,6 @@ You can provide the following options:
   player can be. Defaults to 280px
 * `colour` (optional) Changes the colour of the song progress background colour.
   Defaults to `#3FA9F5`
+* `dark` (optional) Changes the theme to dark mode
 * `sources` (**required**) A comma-separated list of URLs containing one or more
   audio source for this player, in order of priority
