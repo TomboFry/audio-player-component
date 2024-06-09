@@ -24,7 +24,7 @@ class AudioPlayer extends HTMLElement {
 	#shadow: ShadowRoot;
 
 	static get observedAttributes() {
-		return ['title', 'artist', 'image', 'sources', 'compact', 'min-height'];
+		return ['title', 'artist', 'image', 'compact', 'blurred', 'min-height', 'sources'];
 	}
 
 	static get svgPlay() {
