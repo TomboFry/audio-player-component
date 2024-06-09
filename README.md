@@ -32,5 +32,7 @@ You can provide the following options:
   image, displaying **only** the controls
 * `min-height` (optional) If you provide an image, this changes how tall the
   player can be. Defaults to 280px
+* `colour` (optional) Changes the colour of the song progress background colour.
+  Defaults to `#3FA9F5`
 * `sources` (**required**) A comma-separated list of URLs containing one or more
   audio source for this player, in order of priority

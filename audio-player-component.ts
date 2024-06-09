@@ -17,14 +17,15 @@ class AudioPlayer extends HTMLElement {
 	#songImage: string;
 	#isCompact: boolean;
 	#isBlurred: boolean;
-	#isPlaying = false;
-	#minHeight = 280;
-	#audio: HTMLAudioElement = document.createElement('audio');
+	#minHeight: number;
+	#colour: string;
 
+	#audio: HTMLAudioElement = document.createElement('audio');
+	#isPlaying = false;
 	#shadow: ShadowRoot;
 
 	static get observedAttributes() {
-		return ['title', 'artist', 'image', 'compact', 'blurred', 'min-height', 'sources'];
+		return ['title', 'artist', 'image', 'compact', 'blurred', 'min-height', 'sources', 'colour'];
 	}
 
 	static get svgPlay() {
@@ -43,6 +44,7 @@ class AudioPlayer extends HTMLElement {
 		this.#songImage = this.getAttribute('image') || '';
 		this.#isCompact = this.getAttribute('compact') !== null;
 		this.#isBlurred = this.getAttribute('blurred') !== 'false' || !(this.#songTitle && this.#songArtist);
+		this.#colour = this.getAttribute('colour') || '#3FA9F5';
 
 		const minHeight = Number(this.getAttribute('min-height') ?? 280);
 		this.#minHeight = Number.isSafeInteger(minHeight) ? minHeight : 280;
@@ -186,7 +188,7 @@ class AudioPlayer extends HTMLElement {
 			left: 12.5%;
 			width: 75%;
 			height: 75%;
-			fill: var(--text);
+			fill: #333;
 		}
 
 		.tap--progress--bar {
@@ -207,7 +209,6 @@ class AudioPlayer extends HTMLElement {
 			left: 0;
 			height: 100%;
 			width: 0%;
-			background-color: var(--primary);
 			pointer-events: none;
 			transition: width 0.2s;
 		}
@@ -220,7 +221,7 @@ class AudioPlayer extends HTMLElement {
 			font-weight: 700;
 			font-family: monospace;
 			margin-right: 16px;
-			color: var(--text);
+			color: #333;
 			user-select: none;
 		}
 
@@ -286,6 +287,8 @@ class AudioPlayer extends HTMLElement {
 		const progressText = AudioPlayer.createElement({ className: 'tap--progress--timestamp' });
 		const playBtn = AudioPlayer.createElement({ tagName: 'button', className: 'tap--button' });
 		playBtn.innerHTML = AudioPlayer.svgPlay;
+
+		progressPlayhead.style.backgroundColor = this.#colour;
 
 		const setProgressText = () => {
 			const currentMins = AudioPlayer.padTime(Math.floor(this.#audio.currentTime / 60));
