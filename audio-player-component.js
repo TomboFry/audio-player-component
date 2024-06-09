@@ -40,9 +40,15 @@
       this.#songArtist = this.getAttribute("artist");
       this.#songImage = this.getAttribute("image") || "";
       this.#isCompact = this.getAttribute("compact") !== null;
-      this.#isBlurred = this.getAttribute("blurred") !== "false" || !(this.#songTitle && this.#songArtist);
       this.#isDark = this.getAttribute("dark") !== null;
       this.#colour = this.getAttribute("colour") || "#3FA9F5";
+      this.#isBlurred = true;
+      const blurred = this.getAttribute("blurred");
+      if (blurred === null) {
+        this.#isBlurred = !!(this.#songTitle && this.#songArtist);
+      } else if (blurred === "false") {
+        this.#isBlurred = false;
+      }
       const minHeight = Number(this.getAttribute("min-height") ?? 280);
       this.#minHeight = Number.isSafeInteger(minHeight) ? minHeight : 280;
       const sources = this.getAttribute("sources")?.split(",") ?? [];
