@@ -48,7 +48,7 @@ class AudioPlayer extends HTMLElement {
 		this.#colour = this.getAttribute('colour') || '#3FA9F5';
 
 		this.#isBlurred = true;
-		let blurred = this.getAttribute('blurred');
+		const blurred = this.getAttribute('blurred');
 		if (blurred === null) {
 			this.#isBlurred = !!(this.#songTitle && this.#songArtist);
 		} else if (blurred === 'false') {
