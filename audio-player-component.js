@@ -18,12 +18,13 @@
     #songImage;
     #isCompact;
     #isBlurred;
-    #isPlaying = false;
-    #minHeight = 280;
+    #minHeight;
+    #colour;
     #audio = document.createElement("audio");
+    #isPlaying = false;
     #shadow;
     static get observedAttributes() {
-      return ["title", "artist", "image", "compact", "blurred", "min-height", "sources"];
+      return ["title", "artist", "image", "compact", "blurred", "min-height", "sources", "colour"];
     }
     static get svgPlay() {
       return '<svg xmlns="https://www.w3.org/2000/svg" width="24" height="24" viewBox="-1 0 23 24"><title>Play</title><polygon class="icon-play" points="19.05 12 6 3.36 6 20.64 19.05 12"/></svg>';
@@ -39,6 +40,7 @@
       this.#songImage = this.getAttribute("image") || "";
       this.#isCompact = this.getAttribute("compact") !== null;
       this.#isBlurred = this.getAttribute("blurred") !== "false" || !(this.#songTitle && this.#songArtist);
+      this.#colour = this.getAttribute("colour") || "#3FA9F5";
       const minHeight = Number(this.getAttribute("min-height") ?? 280);
       this.#minHeight = Number.isSafeInteger(minHeight) ? minHeight : 280;
       const sources = this.getAttribute("sources")?.split(",") ?? [];
@@ -170,7 +172,7 @@
 			left: 12.5%;
 			width: 75%;
 			height: 75%;
-			fill: var(--text);
+			fill: #333;
 		}
 
 		.tap--progress--bar {
@@ -191,7 +193,6 @@
 			left: 0;
 			height: 100%;
 			width: 0%;
-			background-color: var(--primary);
 			pointer-events: none;
 			transition: width 0.2s;
 		}
@@ -204,7 +205,7 @@
 			font-weight: 700;
 			font-family: monospace;
 			margin-right: 16px;
-			color: var(--text);
+			color: #333;
 			user-select: none;
 		}
 
@@ -262,6 +263,7 @@
       const progressText = _AudioPlayer.createElement({ className: "tap--progress--timestamp" });
       const playBtn = _AudioPlayer.createElement({ tagName: "button", className: "tap--button" });
       playBtn.innerHTML = _AudioPlayer.svgPlay;
+      progressPlayhead.style.backgroundColor = this.#colour;
       const setProgressText = () => {
         const currentMins = _AudioPlayer.padTime(Math.floor(this.#audio.currentTime / 60));
         const currentSecs = _AudioPlayer.padTime(Math.floor(this.#audio.currentTime % 60));
