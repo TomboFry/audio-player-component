@@ -1,0 +1,29 @@
+name: Deploy latest version
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  deployment:
+    environment: github-pages
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 🛎️ Checkout
+      uses: actions/checkout@v4
+    - name: ⚙ Use Node.js 18.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: 'npm'
+    - name: 🔧 Build
+      run: |
+        npm ci
+        npm run lint
+        npm run build
+        npm run build:min
+    - name: 🚀 Deploy
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        folder: /dist
