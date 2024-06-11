@@ -68,6 +68,11 @@
       return elm;
     }
     loadAudio(sources) {
+      if (sources.length === 1) {
+        this.#audio.src = sources[0];
+        this.#audio.load();
+        return;
+      }
       for (const src of sources) {
         const extension = src.split(".").pop();
         const type = mimeTypeMap[extension ?? "mp3"];
