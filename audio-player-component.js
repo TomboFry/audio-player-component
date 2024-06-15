@@ -22,6 +22,7 @@
     #minHeight;
     #colour;
     #audio = document.createElement("audio");
+    #playBtn = null;
     #isPlaying = false;
     #shadow;
     static get observedAttributes() {
@@ -289,8 +290,11 @@
       const progressBar = _AudioPlayer.createElement({ className: "tap--progress--bar" });
       const progressPlayhead = _AudioPlayer.createElement({ className: "tap--progress--playhead" });
       const progressText = _AudioPlayer.createElement({ className: "tap--progress--timestamp" });
-      const playBtn = _AudioPlayer.createElement({ tagName: "button", className: "tap--button" });
-      playBtn.innerHTML = _AudioPlayer.svgPlay;
+      this.#playBtn = _AudioPlayer.createElement({
+        tagName: "button",
+        className: "tap--button"
+      });
+      this.#playBtn.innerHTML = _AudioPlayer.svgPlay;
       progressPlayhead.style.backgroundColor = this.#colour;
       const setProgressText = () => {
         const currentMins = _AudioPlayer.padTime(Math.floor(this.#audio.currentTime / 60));
@@ -300,16 +304,9 @@
         progressText.innerHTML = `${currentMins}:${currentSecs}<br/>${totalMins}:${totalSecs}`;
         progressPlayhead.style.width = `${this.#audio.currentTime * 100 / (this.#audio.duration || 1)}%`;
       };
-      playBtn.onclick = () => {
-        if (!this.#isPlaying) {
-          this.#audio.play();
-          this.#isPlaying = true;
-          playBtn.innerHTML = _AudioPlayer.svgPause;
-          return;
-        }
-        this.#audio.pause();
-        this.#isPlaying = false;
-        playBtn.innerHTML = _AudioPlayer.svgPlay;
+      this.#playBtn.onclick = () => {
+        if (!this.#isPlaying) return this.play();
+        this.pause();
       };
       const scrub = (e) => {
         const percentage = e.layerX / e.target.offsetWidth;
@@ -325,7 +322,7 @@
       progressBar.onmousemove = (e) => mousedown && scrub(e);
       progressBar.onclick = scrub;
       progressBar.appendChild(progressPlayhead);
-      controls.appendChild(playBtn);
+      controls.appendChild(this.#playBtn);
       controls.appendChild(progressBar);
       controls.appendChild(progressText);
       setProgressText();
@@ -334,7 +331,7 @@
       this.#audio.onended = () => {
         this.#audio.currentTime = 0;
         this.#isPlaying = false;
-        playBtn.innerHTML = _AudioPlayer.svgPlay;
+        this.#playBtn.innerHTML = _AudioPlayer.svgPlay;
       };
       this.#audio.style.display = "none";
       if (this.#isCompact) {
@@ -343,6 +340,20 @@
       }
       container.appendChild(controls);
       this.#shadow.appendChild(container);
+    }
+    async play() {
+      await this.#audio.play();
+      this.#isPlaying = true;
+      this.#playBtn.innerHTML = _AudioPlayer.svgPause;
+    }
+    pause() {
+      this.#audio.pause();
+      this.#isPlaying = false;
+      this.#playBtn.innerHTML = _AudioPlayer.svgPlay;
+    }
+    stop() {
+      this.pause();
+      this.#audio.fastSeek(0);
     }
   };
   window.customElements.define("audio-player", AudioPlayer);
