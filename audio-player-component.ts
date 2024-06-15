@@ -22,6 +22,7 @@ class AudioPlayer extends HTMLElement {
 	#colour: string;
 
 	#audio: HTMLAudioElement = document.createElement('audio');
+	#playBtn: HTMLButtonElement = null;
 	#isPlaying = false;
 	#shadow: ShadowRoot;
 
@@ -29,10 +30,10 @@ class AudioPlayer extends HTMLElement {
 		return ['title', 'artist', 'image', 'compact', 'blurred', 'min-height', 'sources', 'colour', 'dark'];
 	}
 
-	static get svgPlay() {
+	private static get svgPlay() {
 		return '<svg xmlns="https://www.w3.org/2000/svg" width="24" height="24" viewBox="-1 0 23 24"><title>Play</title><polygon class="icon-play" points="19.05 12 6 3.36 6 20.64 19.05 12"/></svg>';
 	}
-	static get svgPause() {
+	private static get svgPause() {
 		return '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Pause</title><g><rect class="icon-pause" x="6" y="3" width="4" height="18"/><rect class="icon-pause" x="14" y="3" width="4" height="18"/></g></svg>';
 	}
 
@@ -67,11 +68,11 @@ class AudioPlayer extends HTMLElement {
 		this.createPlayer();
 	}
 
-	static padTime(num: number) {
+	private static padTime(num: number) {
 		return num < 10 ? `0${num}` : num.toString();
 	}
 
-	static createElement({ tagName = 'div', className = '', ...props }: Record<string, string> = {}) {
+	private static createElement({ tagName = 'div', className = '', ...props }: Record<string, string> = {}) {
 		const elm = document.createElement(tagName);
 		elm.className = className;
 
@@ -82,7 +83,7 @@ class AudioPlayer extends HTMLElement {
 		return elm;
 	}
 
-	loadAudio(sources: string[]) {
+	private loadAudio(sources: string[]) {
 		if (sources.length === 1) {
 			this.#audio.src = sources[0];
 			this.#audio.load();
@@ -107,7 +108,7 @@ class AudioPlayer extends HTMLElement {
 		this.#audio.load();
 	}
 
-	get styleCss() {
+	private get styleCss() {
 		return `
 		.tap--container {
 			width: 100%;
@@ -269,7 +270,7 @@ class AudioPlayer extends HTMLElement {
 		`;
 	}
 
-	addOverlayToContainer(container: HTMLElement) {
+	private addOverlayToContainer(container: HTMLElement) {
 		if (this.#isCompact) return;
 
 		const img = AudioPlayer.createElement({
@@ -303,7 +304,7 @@ class AudioPlayer extends HTMLElement {
 		container.appendChild(metadata);
 	}
 
-	createPlayer() {
+	private createPlayer() {
 		// Create elements
 		const container = AudioPlayer.createElement({ className: 'tap--container' });
 		if (!this.#isCompact) container.style.minHeight = `${this.#minHeight}px`;
@@ -316,8 +317,11 @@ class AudioPlayer extends HTMLElement {
 		const progressBar = AudioPlayer.createElement({ className: 'tap--progress--bar' });
 		const progressPlayhead = AudioPlayer.createElement({ className: 'tap--progress--playhead' });
 		const progressText = AudioPlayer.createElement({ className: 'tap--progress--timestamp' });
-		const playBtn = AudioPlayer.createElement({ tagName: 'button', className: 'tap--button' });
-		playBtn.innerHTML = AudioPlayer.svgPlay;
+		this.#playBtn = AudioPlayer.createElement({
+			tagName: 'button',
+			className: 'tap--button',
+		}) as HTMLButtonElement;
+		this.#playBtn.innerHTML = AudioPlayer.svgPlay;
 
 		progressPlayhead.style.backgroundColor = this.#colour;
 
@@ -333,17 +337,9 @@ class AudioPlayer extends HTMLElement {
 		};
 
 		// User interaction
-		playBtn.onclick = () => {
-			if (!this.#isPlaying) {
-				this.#audio.play();
-				this.#isPlaying = true;
-				playBtn.innerHTML = AudioPlayer.svgPause;
-				return;
-			}
-
-			this.#audio.pause();
-			this.#isPlaying = false;
-			playBtn.innerHTML = AudioPlayer.svgPlay;
+		this.#playBtn.onclick = () => {
+			if (!this.#isPlaying) return this.play();
+			this.pause();
 		};
 
 		const scrub = (e: MouseEvent) => {
@@ -366,7 +362,7 @@ class AudioPlayer extends HTMLElement {
 
 		progressBar.appendChild(progressPlayhead);
 
-		controls.appendChild(playBtn);
+		controls.appendChild(this.#playBtn);
 		controls.appendChild(progressBar);
 		controls.appendChild(progressText);
 
@@ -377,7 +373,7 @@ class AudioPlayer extends HTMLElement {
 		this.#audio.onended = () => {
 			this.#audio.currentTime = 0;
 			this.#isPlaying = false;
-			playBtn.innerHTML = AudioPlayer.svgPlay;
+			this.#playBtn.innerHTML = AudioPlayer.svgPlay;
 		};
 
 		this.#audio.style.display = 'none';
@@ -389,6 +385,23 @@ class AudioPlayer extends HTMLElement {
 
 		container.appendChild(controls);
 		this.#shadow.appendChild(container);
+	}
+
+	public async play() {
+		await this.#audio.play();
+		this.#isPlaying = true;
+		this.#playBtn.innerHTML = AudioPlayer.svgPause;
+	}
+
+	public pause() {
+		this.#audio.pause();
+		this.#isPlaying = false;
+		this.#playBtn.innerHTML = AudioPlayer.svgPlay;
+	}
+
+	public stop() {
+		this.pause();
+		this.#audio.fastSeek(0);
 	}
 }
 
