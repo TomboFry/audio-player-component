@@ -15,6 +15,7 @@
   var AudioPlayer = class _AudioPlayer extends HTMLElement {
     #songTitle;
     #songArtist;
+    #songAlbum;
     #isCompact;
     #audio = document.createElement("audio");
     #playBtn = null;
@@ -49,6 +50,7 @@
       this.#shadow = this.attachShadow({ mode: "open" });
       this.#songTitle = this.getAttribute("title");
       this.#songArtist = this.getAttribute("artist");
+      this.#songAlbum = this.getAttribute("album");
       this.#isCompact = this.getAttribute("compact") !== null;
       const preload = this.getAttribute("preload") ?? "auto";
       if (preload === "" || preload === "none" || preload === "auto" || preload === "metadata") {
@@ -56,8 +58,6 @@
       }
       const sources = this.getAttribute("sources")?.split(",") ?? [];
       this.loadAudio(sources);
-      this.#shadow.appendChild(_AudioPlayer.createElement({ tagName: "style", textContent: this.styleCss }));
-      this.createPlayer();
     }
     static padTime(num) {
       return num < 10 ? `0${num}` : num.toString();
@@ -182,7 +182,7 @@
 			width: 48px;
 			height: 48px;
 			position: relative;
-			margin-left: 8px;
+			margin: 0 8px;
 			background-color: var(--audio-player-button);
 		}
 
@@ -210,7 +210,7 @@
 			height: 24px;
 			background-color: var(--audio-player-progress);
 			border-radius: 12px;
-			margin: 0 12px;
+			margin: 0;
 			cursor: pointer;
 			position: relative;
 			overflow: hidden;
@@ -234,7 +234,7 @@
 		.tap--progress--timestamp {
 			font-weight: 700;
 			font-family: monospace;
-			margin-right: 16px;
+			margin: 0 8px;
 			color: var(--audio-player-text);
 			user-select: none;
 		}
@@ -269,30 +269,40 @@
         src: this.getAttribute("image") || ""
       });
       const blurred = this.getAttribute("blurred");
-      const isBlurred = blurred === null ? !!(this.#songTitle && this.#songArtist) : blurred !== "false";
+      const isBlurred = blurred === null ? !!(this.#songTitle && this.#songArtist && this.#songAlbum) : blurred !== "false";
       if (isBlurred) {
         img.classList.add("blurred");
       }
       container.appendChild(img);
-      if (!(this.#songTitle && this.#songArtist)) return;
+      if (!(this.#songTitle || this.#songArtist || this.#songAlbum)) return;
       const overlay = _AudioPlayer.createElement({ className: "tap--overlay" });
       const metadata = _AudioPlayer.createElement({ className: "tap--metadata" });
       const title = _AudioPlayer.createElement({
         tagName: "span",
         className: "tap--metadata__title",
-        innerText: this.#songTitle
+        textContent: this.#songTitle
       });
+      let artistText = "";
+      if (this.#songArtist === null && this.#songAlbum !== null) {
+        artistText = this.#songAlbum;
+      } else if (this.#songArtist !== null && this.#songAlbum === null) {
+        artistText = this.#songArtist;
+      } else if (this.#songArtist !== null && this.#songAlbum !== null) {
+        artistText = `from ${this.#songAlbum}, by ${this.#songArtist}`;
+      }
       const artist = _AudioPlayer.createElement({
         tagName: "span",
         className: "tap--metadata__artist",
-        innerText: this.#songArtist
+        textContent: artistText
       });
       metadata.appendChild(title);
       metadata.appendChild(artist);
       container.appendChild(overlay);
       container.appendChild(metadata);
     }
-    createPlayer() {
+    connectedCallback() {
+      this.#shadow.innerHTML = "";
+      this.#shadow.appendChild(_AudioPlayer.createElement({ tagName: "style", textContent: this.styleCss }));
       const container = _AudioPlayer.createElement({ className: "tap--container" });
       if (!this.#isCompact) {
         const minHeightUnsafe = Number(this.getAttribute("min-height") ?? 280);
@@ -307,9 +317,9 @@
       const progressText = _AudioPlayer.createElement({ className: "tap--progress--timestamp" });
       this.#playBtn = _AudioPlayer.createElement({
         tagName: "button",
-        className: "tap--button"
+        className: "tap--button",
+        innerHTML: _AudioPlayer.svgPlay
       });
-      this.#playBtn.innerHTML = _AudioPlayer.svgPlay;
       progressPlayhead.style.backgroundColor = this.getAttribute("colour") || this.getAttribute("color") || "#3FA9F5";
       const setProgressText = () => {
         const lengthSecs = Number(this.getAttribute("length-secs") ?? 0);

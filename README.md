@@ -38,14 +38,15 @@ You can provide the following attributes to the audio player:
 
 * `sources` (**required**) A comma-separated list of URLs containing one or more
   audio source for this player, in order of priority.
-* `title` (optional) The audio track's title
-* `artist` (optional) The audio track's artist
+* `title` (optional) The audio track's title.
+* `artist` (optional) The audio track's artist.
+* `album` (optional) The audio track's album.
 * `image` (optional) The image used on the player's background.
-* `compact` (optional) If provided, this will remove the title, artist, and
-  image, displaying **only** the controls
+* `compact` (optional) If provided, this will remove the title, artist, album,
+  and image, displaying **only** the controls.
 * `colour` (optional) Changes the colour of the song progress background colour.
-  Defaults to `#3FA9F5`
-* `dark` (optional) Changes the theme to dark mode
+  Defaults to `#3FA9F5`.
+* `dark` (optional) Changes the theme to dark mode.
 * `blurred` (optional) If an image is provided, setting this to `false` will
   disable the blur. Enabled by default, unless you leave the `title` AND
   `artist` blank.
@@ -53,7 +54,7 @@ You can provide the following attributes to the audio player:
 ### Niche/Technical Options
 
 * `min-height` (optional) If you provide an image, this changes how tall the
-  player can be. Defaults to `280` (pixels)
+  player can be. Defaults to `280` (pixels).
 * `preload` (optional) The same as the regular preload option - one of: `none`,
   `metadata`, or `auto`.
 * `length-secs` (optional) If you've set `preload` to `none`, and you know the
