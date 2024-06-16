@@ -14,20 +14,27 @@ const mimeTypeMap: Record<string, string> = {
 class AudioPlayer extends HTMLElement {
 	#songTitle: string | null;
 	#songArtist: string | null;
-	#songImage: string;
 	#isCompact: boolean;
-	#isBlurred: boolean;
-	#isDark: boolean;
-	#minHeight: number;
-	#colour: string;
 
 	#audio: HTMLAudioElement = document.createElement('audio');
 	#playBtn: HTMLButtonElement = null;
 	#isPlaying = false;
+	#isLoaded = false;
 	#shadow: ShadowRoot;
 
 	static get observedAttributes() {
-		return ['title', 'artist', 'image', 'compact', 'blurred', 'min-height', 'sources', 'colour', 'dark'];
+		return [
+			'title',
+			'artist',
+			'image',
+			'compact',
+			'blurred',
+			'min-height',
+			'sources',
+			'colour',
+			'dark',
+			'length-secs',
+		];
 	}
 
 	private static get svgPlay() {
@@ -36,6 +43,9 @@ class AudioPlayer extends HTMLElement {
 	private static get svgPause() {
 		return '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Pause</title><g><rect class="icon-pause" x="6" y="3" width="4" height="18"/><rect class="icon-pause" x="14" y="3" width="4" height="18"/></g></svg>';
 	}
+	private static get svgLoading() {
+		return '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="loading"><circle cx="12" cy="4" r="2.5"/><circle cx="6" cy="6" r="2.25"/><circle cx="4" cy="12" r="2"/><circle cx="6" cy="18" r="1.75"/><circle cx="12" cy="20" r="1.5"/><circle cx="18" cy="18" r="1.25"/><circle cx="20" cy="12" r="1"/><circle cx="18" cy="6" r="0.75"/></svg>';
+	}
 
 	constructor() {
 		super();
@@ -43,21 +53,12 @@ class AudioPlayer extends HTMLElement {
 		this.#shadow = this.attachShadow({ mode: 'open' });
 		this.#songTitle = this.getAttribute('title');
 		this.#songArtist = this.getAttribute('artist');
-		this.#songImage = this.getAttribute('image') || '';
 		this.#isCompact = this.getAttribute('compact') !== null;
-		this.#isDark = this.getAttribute('dark') !== null;
-		this.#colour = this.getAttribute('colour') || '#3FA9F5';
 
-		this.#isBlurred = true;
-		const blurred = this.getAttribute('blurred');
-		if (blurred === null) {
-			this.#isBlurred = !!(this.#songTitle && this.#songArtist);
-		} else if (blurred === 'false') {
-			this.#isBlurred = false;
+		const preload = this.getAttribute('preload') ?? 'auto';
+		if (preload === '' || preload === 'none' || preload === 'auto' || preload === 'metadata') {
+			this.#audio.preload = preload;
 		}
-
-		const minHeight = Number(this.getAttribute('min-height') ?? 280);
-		this.#minHeight = Number.isSafeInteger(minHeight) ? minHeight : 280;
 
 		const sources = this.getAttribute('sources')?.split(',') ?? [];
 		this.loadAudio(sources);
@@ -86,9 +87,9 @@ class AudioPlayer extends HTMLElement {
 	private loadAudio(sources: string[]) {
 		if (sources.length === 1) {
 			this.#audio.src = sources[0];
-			this.#audio.load();
 			return;
 		}
+
 		for (const src of sources) {
 			const extension = src.split('.').pop();
 			const type = mimeTypeMap[extension ?? 'mp3'];
@@ -105,7 +106,6 @@ class AudioPlayer extends HTMLElement {
 				}),
 			);
 		}
-		this.#audio.load();
 	}
 
 	private get styleCss() {
@@ -152,14 +152,14 @@ class AudioPlayer extends HTMLElement {
 
 		.tap--metadata__title {
 			font-size: 32px;
-			font-weight: 900;
+			font-weight: 700;
 			display: block;
 			margin-bottom: 16px;
 		}
 
 		.tap--metadata__artist {
 			font-size: 28px;
-			font-weight: 700;
+			font-weight: 400;
 		}
 
 		.tap--container .tap--controls {
@@ -256,6 +256,15 @@ class AudioPlayer extends HTMLElement {
 			user-select: none;
 		}
 
+		.loading {
+			animation: 1s infinite loading linear;
+		}
+
+		@keyframes loading {
+			from { transform: rotate(0); }
+			to { transform: rotate(360deg); }
+		}
+
 		@media (max-width: 640px) {
 			.tap--metadata__title {
 				font-size: 24px;
@@ -276,11 +285,16 @@ class AudioPlayer extends HTMLElement {
 		const img = AudioPlayer.createElement({
 			tagName: 'img',
 			className: 'tap--img',
-			src: this.#songImage,
+			src: this.getAttribute('image') || '',
 		});
-		if (this.#isBlurred) {
+
+		const blurred = this.getAttribute('blurred');
+		const isBlurred = blurred === null ? !!(this.#songTitle && this.#songArtist) : blurred !== 'false';
+
+		if (isBlurred) {
 			img.classList.add('blurred');
 		}
+
 		container.appendChild(img);
 
 		if (!(this.#songTitle && this.#songArtist)) return;
@@ -307,12 +321,16 @@ class AudioPlayer extends HTMLElement {
 	private createPlayer() {
 		// Create elements
 		const container = AudioPlayer.createElement({ className: 'tap--container' });
-		if (!this.#isCompact) container.style.minHeight = `${this.#minHeight}px`;
+		if (!this.#isCompact) {
+			const minHeightUnsafe = Number(this.getAttribute('min-height') ?? 280);
+			const minHeight = Number.isSafeInteger(minHeightUnsafe) ? minHeightUnsafe : 280;
+			container.style.minHeight = `${minHeight}px`;
+		}
 
 		this.addOverlayToContainer(container);
 
 		const controls = AudioPlayer.createElement({ className: 'tap--controls' });
-		if (this.#isDark) controls.classList.add('dark');
+		if (this.getAttribute('dark') !== null) controls.classList.add('dark');
 
 		const progressBar = AudioPlayer.createElement({ className: 'tap--progress--bar' });
 		const progressPlayhead = AudioPlayer.createElement({ className: 'tap--progress--playhead' });
@@ -323,14 +341,16 @@ class AudioPlayer extends HTMLElement {
 		}) as HTMLButtonElement;
 		this.#playBtn.innerHTML = AudioPlayer.svgPlay;
 
-		progressPlayhead.style.backgroundColor = this.#colour;
+		progressPlayhead.style.backgroundColor =
+			this.getAttribute('colour') || this.getAttribute('color') || '#3FA9F5';
 
 		const setProgressText = () => {
+			const lengthSecs = Number(this.getAttribute('length-secs') ?? 0);
 			const currentMins = AudioPlayer.padTime(Math.floor(this.#audio.currentTime / 60));
 			const currentSecs = AudioPlayer.padTime(Math.floor(this.#audio.currentTime % 60));
 
-			const totalMins = AudioPlayer.padTime(Math.floor((this.#audio.duration || 0) / 60));
-			const totalSecs = AudioPlayer.padTime(Math.floor((this.#audio.duration || 0) % 60));
+			const totalMins = AudioPlayer.padTime(Math.floor((this.#audio.duration || lengthSecs) / 60));
+			const totalSecs = AudioPlayer.padTime(Math.floor((this.#audio.duration || lengthSecs) % 60));
 
 			progressText.innerHTML = `${currentMins}:${currentSecs}<br/>${totalMins}:${totalSecs}`;
 			progressPlayhead.style.width = `${(this.#audio.currentTime * 100) / (this.#audio.duration || 1)}%`;
@@ -338,6 +358,7 @@ class AudioPlayer extends HTMLElement {
 
 		// User interaction
 		this.#playBtn.onclick = () => {
+			if (this.#isPlaying && !this.#isLoaded) return;
 			if (!this.#isPlaying) return this.play();
 			this.pause();
 		};
@@ -388,8 +409,16 @@ class AudioPlayer extends HTMLElement {
 	}
 
 	public async play() {
-		await this.#audio.play();
 		this.#isPlaying = true;
+
+		if (this.#audio.readyState <= 1) {
+			this.#audio.load();
+			this.#playBtn.innerHTML = AudioPlayer.svgLoading;
+		}
+
+		await this.#audio.play();
+
+		this.#isLoaded = true;
 		this.#playBtn.innerHTML = AudioPlayer.svgPause;
 	}
 
