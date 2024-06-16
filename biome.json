@@ -35,6 +35,9 @@
 				"useNumberNamespace": "error",
 				"useSingleCaseStatement": "warn",
 				"useTemplate": "error"
+			},
+			"a11y": {
+				"useKeyWithClickEvents": "warn"
 			}
 		}
 	},

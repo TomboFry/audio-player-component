@@ -47,6 +47,9 @@ class AudioPlayer extends HTMLElement {
 	private static get svgLoading() {
 		return '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="loading"><circle cx="12" cy="4" r="2.5"/><circle cx="6" cy="6" r="2.25"/><circle cx="4" cy="12" r="2"/><circle cx="6" cy="18" r="1.75"/><circle cx="12" cy="20" r="1.5"/><circle cx="18" cy="18" r="1.25"/><circle cx="20" cy="12" r="1"/><circle cx="18" cy="6" r="0.75"/></svg>';
 	}
+	private static get svgPlus() {
+		return '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Add to Queue</title><polygon points="21,10 14,10 14,3 10,3 10,10 3,10 3,14 10,14 10,21 14,21 14,14 21,14 "/></svg>';
+	}
 
 	constructor() {
 		super();
@@ -372,6 +375,19 @@ class AudioPlayer extends HTMLElement {
 
 		// User interaction
 		this.#playBtn.onclick = () => {
+			// @ts-expect-error
+			if (window.TomboAudioPlayer?.addToPlaylistAndPlay) {
+				// @ts-expect-error
+				window.TomboAudioPlayer.addToPlaylistAndPlay({
+					title: this.#songTitle,
+					artist: this.#songArtist,
+					album: this.#songAlbum,
+					src: this.#audio.src,
+					imageSrc: this.getAttribute('image'),
+				});
+				return;
+			}
+
 			if (this.#isPlaying && !this.#isLoaded) return;
 			if (!this.#isPlaying) return this.play();
 			this.pause();
@@ -400,6 +416,26 @@ class AudioPlayer extends HTMLElement {
 		controls.appendChild(this.#playBtn);
 		controls.appendChild(progressBar);
 		controls.appendChild(progressText);
+
+		// @ts-expect-error
+		if (window.TomboAudioPlayer?.addToPlaylist) {
+			const addToPlaylist = AudioPlayer.createElement({
+				tagName: 'button',
+				className: 'tap--button',
+				innerHTML: AudioPlayer.svgPlus,
+			});
+			addToPlaylist.onclick = () => {
+				// @ts-expect-error
+				window.TomboAudioPlayer.addToPlaylist({
+					title: this.#songTitle,
+					album: this.#songAlbum,
+					artist: this.#songArtist,
+					src: this.#audio.src,
+					imageSrc: this.getAttribute('image'),
+				});
+			};
+			controls.appendChild(addToPlaylist);
+		}
 
 		setProgressText();
 		this.#audio.ondurationchange = setProgressText;

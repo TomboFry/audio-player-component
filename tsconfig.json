@@ -1,14 +1,26 @@
 {
 	"compilerOptions": {
 		"target": "ESNext",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
 		"strict": false,
 		"declaration": true,
 		"removeComments": true,
 		"noImplicitOverride": true,
 		"outDir": "./dist",
 		"rootDir": "./",
+		"jsx": "react-jsx",
+		"jsxImportSource": "preact",
+		"baseUrl": "./",
+		"plugins": [
+			{
+				"name": "typescript-plugin-css-modules",
+				"options": {
+					"classnameTransform": "dashes",
+					"customMatcher": "\\.module\\.css$",
+				}
+			}
+		]
 	},
-	"include": [
-		"audio-player-component.ts",
-	]
+	"include": ["audio-player-component.ts", "web-player/*"]
 }
