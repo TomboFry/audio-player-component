@@ -38,6 +38,7 @@
 			}
 		}
 	},
+	"organizeImports": { "enabled": true },
 	"formatter": {
 		"enabled": true,
 		"formatWithErrors": true,

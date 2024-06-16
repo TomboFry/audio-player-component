@@ -14,6 +14,7 @@ const mimeTypeMap: Record<string, string> = {
 class AudioPlayer extends HTMLElement {
 	#songTitle: string | null;
 	#songArtist: string | null;
+	#songAlbum: string | null;
 	#isCompact: boolean;
 
 	#audio: HTMLAudioElement = document.createElement('audio');
@@ -53,6 +54,7 @@ class AudioPlayer extends HTMLElement {
 		this.#shadow = this.attachShadow({ mode: 'open' });
 		this.#songTitle = this.getAttribute('title');
 		this.#songArtist = this.getAttribute('artist');
+		this.#songAlbum = this.getAttribute('album');
 		this.#isCompact = this.getAttribute('compact') !== null;
 
 		const preload = this.getAttribute('preload') ?? 'auto';
@@ -62,11 +64,6 @@ class AudioPlayer extends HTMLElement {
 
 		const sources = this.getAttribute('sources')?.split(',') ?? [];
 		this.loadAudio(sources);
-
-		// Apply CSS and add audio element to DOM
-		this.#shadow.appendChild(AudioPlayer.createElement({ tagName: 'style', textContent: this.styleCss }));
-
-		this.createPlayer();
 	}
 
 	private static padTime(num: number) {
@@ -199,7 +196,7 @@ class AudioPlayer extends HTMLElement {
 			width: 48px;
 			height: 48px;
 			position: relative;
-			margin-left: 8px;
+			margin: 0 8px;
 			background-color: var(--audio-player-button);
 		}
 
@@ -227,7 +224,7 @@ class AudioPlayer extends HTMLElement {
 			height: 24px;
 			background-color: var(--audio-player-progress);
 			border-radius: 12px;
-			margin: 0 12px;
+			margin: 0;
 			cursor: pointer;
 			position: relative;
 			overflow: hidden;
@@ -251,7 +248,7 @@ class AudioPlayer extends HTMLElement {
 		.tap--progress--timestamp {
 			font-weight: 700;
 			font-family: monospace;
-			margin-right: 16px;
+			margin: 0 8px;
 			color: var(--audio-player-text);
 			user-select: none;
 		}
@@ -289,7 +286,10 @@ class AudioPlayer extends HTMLElement {
 		});
 
 		const blurred = this.getAttribute('blurred');
-		const isBlurred = blurred === null ? !!(this.#songTitle && this.#songArtist) : blurred !== 'false';
+		const isBlurred =
+			blurred === null
+				? !!(this.#songTitle && this.#songArtist && this.#songAlbum)
+				: blurred !== 'false';
 
 		if (isBlurred) {
 			img.classList.add('blurred');
@@ -297,19 +297,28 @@ class AudioPlayer extends HTMLElement {
 
 		container.appendChild(img);
 
-		if (!(this.#songTitle && this.#songArtist)) return;
+		if (!(this.#songTitle || this.#songArtist || this.#songAlbum)) return;
 
 		const overlay = AudioPlayer.createElement({ className: 'tap--overlay' });
 		const metadata = AudioPlayer.createElement({ className: 'tap--metadata' });
 		const title = AudioPlayer.createElement({
 			tagName: 'span',
 			className: 'tap--metadata__title',
-			innerText: this.#songTitle,
+			textContent: this.#songTitle,
 		});
+
+		let artistText = '';
+		if (this.#songArtist === null && this.#songAlbum !== null) {
+			artistText = this.#songAlbum;
+		} else if (this.#songArtist !== null && this.#songAlbum === null) {
+			artistText = this.#songArtist;
+		} else if (this.#songArtist !== null && this.#songAlbum !== null) {
+			artistText = `from ${this.#songAlbum}, by ${this.#songArtist}`;
+		}
 		const artist = AudioPlayer.createElement({
 			tagName: 'span',
 			className: 'tap--metadata__artist',
-			innerText: this.#songArtist,
+			textContent: artistText,
 		});
 
 		metadata.appendChild(title);
@@ -318,7 +327,12 @@ class AudioPlayer extends HTMLElement {
 		container.appendChild(metadata);
 	}
 
-	private createPlayer() {
+	connectedCallback() {
+		this.#shadow.innerHTML = '';
+
+		// Apply CSS and add audio element to DOM
+		this.#shadow.appendChild(AudioPlayer.createElement({ tagName: 'style', textContent: this.styleCss }));
+
 		// Create elements
 		const container = AudioPlayer.createElement({ className: 'tap--container' });
 		if (!this.#isCompact) {
@@ -338,8 +352,8 @@ class AudioPlayer extends HTMLElement {
 		this.#playBtn = AudioPlayer.createElement({
 			tagName: 'button',
 			className: 'tap--button',
+			innerHTML: AudioPlayer.svgPlay,
 		}) as HTMLButtonElement;
-		this.#playBtn.innerHTML = AudioPlayer.svgPlay;
 
 		progressPlayhead.style.backgroundColor =
 			this.getAttribute('colour') || this.getAttribute('color') || '#3FA9F5';
