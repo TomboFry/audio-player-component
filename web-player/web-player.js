@@ -822,6 +822,8 @@
     "playlist-panel-hide": "web_player_playlist-panel-hide",
     playlistTitle: "web_player_playlistTitle",
     playlistItem: "web_player_playlistItem",
+    newItem: "web_player_newItem",
+    "playlist-item-add": "web_player_playlist-item-add",
     playIndicator: "web_player_playIndicator",
     metadata: "web_player_metadata",
     title: "web_player_title",
@@ -908,12 +910,17 @@
     return /* @__PURE__ */ u3("div", { onClick: props.togglePanel, className: classNames });
   };
   var PlaylistPanel = (props) => {
+    const playlistPreviousLength = F2(0);
+    _2(() => {
+      playlistPreviousLength.current = props.playlist.length;
+    }, [props.playlist.length]);
     const items = [];
     for (let i4 = 0; i4 < props.playlist.length; i4++) {
       const { title, album, src } = props.playlist[i4];
       const classNames2 = classes({
         [web_player_default.playlistItem]: true,
-        [web_player_default.currentlyPlaying]: props.nowPlayingIndex === i4
+        [web_player_default.currentlyPlaying]: props.nowPlayingIndex === i4,
+        [web_player_default.newItem]: i4 >= playlistPreviousLength.current
       });
       items.push(
         /* @__PURE__ */ u3("div", { className: classNames2, children: [
@@ -1003,6 +1010,7 @@
       audio.onended = () => {
         if (nowPlayingIndex.current === playlist.length - 1) {
           stop();
+          return;
         }
         skipForward();
       };
@@ -1033,6 +1041,7 @@
     };
     const stop = () => {
       audio.pause();
+      audio.currentTime = 0;
       nowPlayingIndex.current = null;
       setIsPlaying(false);
       setNavigatorPlaybackState("none");
@@ -1119,6 +1128,10 @@
       addToPlaylist(json);
     };
     const addToPlaylist = (items) => {
+      if (playlist.length === 0) {
+        setPlayPanelOpen(true);
+        setPlaylistPanelOpen(true);
+      }
       setPlaylist((list) => list.concat(items));
     };
     const addToPlaylistAndPlay = (items) => {
@@ -1213,7 +1226,3 @@
     window.customElements.define("web-player", WebPlayer);
   })();
 })();
-//! This is a big hack - we want to make sure the `playSong`
-//! function has at least the first song in array by the time we
-//! play it, but the `addToPlaylist` function will only update
-//! the array by the next render.

@@ -14,6 +14,7 @@
   --border-hover: #ddd;
   --primary: #3FA9F5;
   --negative: #CF2222;
+  --highlight: #ffeebb;
 }
 .web_player_button {
   display: flex;
@@ -113,8 +114,10 @@
   font-family: "FontAwesome";
 }
 .web_player_playbackControlButton.web_player_playPauseBtn {
-  width: 36px;
-  height: 36px;
+  width: 48px;
+  height: 48px;
+  margin: 0 4px;
+  font-size: 26px;
 }
 .web_player_playbackControlButton.web_player_playPauseBtn::before {
   margin-left: 2px;
@@ -162,11 +165,15 @@
   transition: width 0.2s;
 }
 .web_player_playlistToggleButton {
-  width: 48px;
-  height: 48px;
+  width: 30px;
+  height: 30px;
   margin: 8px;
-  font-size: 20px;
+  font-size: 16px;
   font-family: "FontAwesome";
+}
+.web_player_playlistToggleButton.web_player_open {
+  background-color: var(--primary);
+  color: var(--button);
 }
 .web_player_playlistToggleButton::before {
   content: "\f0cb";
@@ -212,15 +219,29 @@
 }
 .web_player_playlistItem {
   cursor: pointer;
-  margin-bottom: 8px;
   width: 100%;
-  padding: 0 8px 8px;
+  padding: 8px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
   display: flex;
   flex-direction: row;
   align-items: center;
+  background-color: var(--panel);
+}
+.web_player_playlistItem.web_player_newItem {
+  animation: 3s web_player_playlist-item-add 1;
+}
+.web_player_playlistItem:last-of-type {
+  margin-bottom: 8px;
+}
+@keyframes web_player_playlist-item-add {
+  from {
+    background-color: var(--highlight);
+  }
+  to {
+    background-color: var(--panel);
+  }
 }
 .web_player_playlistItem .web_player_playIndicator {
   width: 20px;
@@ -273,7 +294,7 @@
     width: 180px;
   }
 }
-@media (max-width: 480px) {
+@media (max-width: 512px) {
   .web_player_container,
   .web_player_floatingButton {
     z-index: 10;
