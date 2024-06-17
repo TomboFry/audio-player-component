@@ -3,6 +3,7 @@
 	"version": "0.0.1",
 	"main": "index.js",
 	"scripts": {
+		"build:all": "npm run build && npm run build:min && npm run build:web-player && npm run build:web-player:min",
 		"build": "esbuild audio-player-component.ts --platform=browser --bundle --outfile=dist/audio-player-component.js",
 		"build:min": "npm run build -- --minify-syntax --minify-identifiers --outfile=dist/audio-player-component.min.js",
 		"build:web-player": "esbuild ./web-player/web-player.tsx --bundle --platform=browser --outfile=dist/web-player/web-player.js",
