@@ -828,6 +828,7 @@
     album: "web_player_album",
     currentlyPlaying: "web_player_currentlyPlaying",
     removeBtn: "web_player_removeBtn",
+    playlistEmpty: "web_player_playlistEmpty",
     disabled: "web_player_disabled"
   };
 
@@ -844,6 +845,7 @@
   }
 
   // web-player/web-player.tsx
+  var audio = new Audio();
   var classes = (classList) => {
     if (Array.isArray(classList)) return classList.join(" ");
     const output = [];
@@ -883,11 +885,19 @@
     ] });
   };
   var Playhead = (props) => {
+    const [playheadWidth, setPlayheadWidth] = p2(0);
+    _2(() => {
+      for (const eventName of ["timeupdate", "ended"]) {
+        audio.addEventListener(eventName, () => {
+          setPlayheadWidth(100 * audio.currentTime / (audio.duration || 1));
+        });
+      }
+    }, []);
     const classNames = classes({
       [web_player_default.playheadContainer]: true,
       [web_player_default.disabled]: !props.buttonsEnabled
     });
-    return /* @__PURE__ */ u3("div", { onClick: props.onClick, className: classNames, children: /* @__PURE__ */ u3("div", { style: { width: `${props.playheadPosition * 100}%` }, className: web_player_default.playheadControl }) });
+    return /* @__PURE__ */ u3("div", { onClick: props.onClick, className: classNames, children: /* @__PURE__ */ u3("div", { style: { width: `${playheadWidth}%` }, className: web_player_default.playheadControl }) });
   };
   var PlaylistToggle = (props) => {
     const classNames = classes({
@@ -922,6 +932,14 @@
         ] }, src)
       );
     }
+    if (items.length === 0) {
+      items.push(
+        /* @__PURE__ */ u3("div", { className: web_player_default.playlistEmpty, children: [
+          /* @__PURE__ */ u3("p", { children: /* @__PURE__ */ u3("strong", { children: "There's nothing in the queue." }) }),
+          /* @__PURE__ */ u3("p", { children: 'You can play music by clicking "Play" on any music player, or the plus icon to add it to the end of the queue.' })
+        ] })
+      );
+    }
     const classNames = classes({
       [web_player_default.playlistPanel]: true,
       [web_player_default.open]: props.open,
@@ -944,7 +962,6 @@
     });
     return /* @__PURE__ */ u3("div", { onClick: props.onClick, className, style });
   };
-  var audio = new Audio();
   var setNavigatorPlaybackState = (state) => {
     if (!("mediaSession" in navigator)) return;
     navigator.mediaSession.playbackState = state;
@@ -976,18 +993,16 @@
     const nowPlayingIndex = F2(null);
     const [isLoading, setIsLoading] = p2(false);
     const [isPlaying, setIsPlaying] = p2(false);
-    const [playheadWidth, setPlayheadWidth] = p2(0);
     const [playlist, setPlaylist] = p2([]);
     _2(() => {
-      audio.ontimeupdate = (_4) => {
-        setPlayheadWidth(audio.currentTime / (audio.duration || 1));
-      };
-      audio.onended = (_4) => {
+      audio.onended = () => {
         if (nowPlayingIndex.current === playlist.length - 1) {
           stop();
         }
         skipForward();
       };
+    }, [playlist.length]);
+    _2(() => {
       if (!("mediaSession" in navigator)) return;
       navigator.mediaSession.setActionHandler("pause", () => playPause(true));
       navigator.mediaSession.setActionHandler("play", () => playPause(false));
@@ -997,12 +1012,11 @@
       navigator.mediaSession.setActionHandler("seekbackward", seek);
       navigator.mediaSession.setActionHandler("seekforward", seek);
       navigator.mediaSession.setActionHandler("seekto", seek);
-    }, [playlist.length]);
+    }, []);
     const nowPlaying = () => nowPlayingIndex.current === null ? null : playlist[nowPlayingIndex.current];
     const setupAudioPlayer = () => {
       if (nowPlayingIndex.current === null) return;
       setIsLoading(true);
-      setPlayheadWidth(0);
       audio.src = playlist[nowPlayingIndex.current].src;
       audio.currentTime = 0;
       audio.load();
@@ -1019,7 +1033,6 @@
       audio.pause();
       nowPlayingIndex.current = null;
       setIsPlaying(false);
-      setPlayheadWidth(0);
       setNavigatorPlaybackState("none");
       setNavigatorMetadata(null);
     };
@@ -1099,16 +1112,13 @@
     };
     const togglePlayPanelOpen = () => setPlayPanelOpen((open) => !open);
     const addToPlaylist = (item) => {
-      setPlaylist((list) => {
-        list.push(item);
-        return list;
-      });
-      setPlaylistPanelOpen(true);
+      setPlaylist((list) => [...list, item]);
     };
     const addToPlaylistAndPlay = (item) => {
       const len = playlist.length;
       setPlayPanelOpen(true);
       addToPlaylist(item);
+      playlist.push(item);
       playSong(len);
     };
     const removeFromPlaylist = (index) => {
@@ -1119,8 +1129,9 @@
         nowPlayingIndex.current -= 1;
       }
       setPlaylist((list) => {
-        list.splice(index, 1);
-        return list;
+        const newList = [...list];
+        newList.splice(index, 1);
+        return newList;
       });
     };
     window.TomboAudioPlayer = {
@@ -1151,14 +1162,7 @@
               isLoading
             }
           ),
-          /* @__PURE__ */ u3(
-            Playhead,
-            {
-              buttonsEnabled: !!nowPlaying(),
-              playheadPosition: playheadWidth,
-              onClick: seekEvent
-            }
-          ),
+          /* @__PURE__ */ u3(Playhead, { buttonsEnabled: !!nowPlaying(), onClick: seekEvent }),
           /* @__PURE__ */ u3(
             PlaylistToggle,
             {

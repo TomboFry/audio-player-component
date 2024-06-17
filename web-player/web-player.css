@@ -13,6 +13,7 @@
   --border: #ccc;
   --border-hover: #ddd;
   --primary: #3FA9F5;
+  --negative: #CF2222;
 }
 .web_player_button {
   display: flex;
@@ -252,8 +253,15 @@
 }
 .web_player_playlistItem .web_player_removeBtn::before {
   font-family: "FontAwesome";
-  color: red;
+  color: var(--negative);
   content: "\f00d";
+}
+.web_player_playlistEmpty {
+  padding: 0 16px;
+}
+.web_player_playlistEmpty p {
+  line-height: 1.4;
+  margin-bottom: 16px;
 }
 .web_player_disabled {
   opacity: 0.75;
