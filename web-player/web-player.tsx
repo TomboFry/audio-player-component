@@ -374,15 +374,37 @@ const Player = (props: PlayerProps) => {
 	};
 	const togglePlayPanelOpen = () => setPlayPanelOpen(open => !open);
 
-	const addToPlaylist = (item: PlaylistItem) => {
-		setPlaylist(list => [...list, item]);
+	const loadPlaylistFromJson = async (url: string, playImmediately = false) => {
+		const json: PlaylistItem[] = await (await fetch(url)).json();
+		if (!(Array.isArray(json) && json.every(item => !!item.src))) {
+			throw new Error(
+				'JSON contains invalid data - must be an array of objects, containing at minimum `src`.',
+			);
+		}
+
+		if (playImmediately) {
+			addToPlaylistAndPlay(json);
+			return;
+		}
+
+		addToPlaylist(json);
 	};
 
-	const addToPlaylistAndPlay = (item: PlaylistItem) => {
+	const addToPlaylist = (items: PlaylistItem | PlaylistItem[]) => {
+		setPlaylist(list => list.concat(items));
+	};
+
+	const addToPlaylistAndPlay = (items: PlaylistItem | PlaylistItem[]) => {
 		const len = playlist.length;
 		setPlayPanelOpen(true);
-		addToPlaylist(item);
-		playlist.push(item);
+		addToPlaylist(items);
+
+		//! This is a big hack - we want to make sure the `playSong`
+		//! function has at least the first song in array by the time we
+		//! play it, but the `addToPlaylist` function will only update
+		//! the array by the next render.
+		playlist.push(Array.isArray(items) ? items[0] : items);
+
 		playSong(len);
 	};
 
@@ -408,6 +430,7 @@ const Player = (props: PlayerProps) => {
 		playPause,
 		skipBack,
 		skipForward,
+		loadPlaylistFromJson,
 	};
 
 	const playPanelClasses = classes({
