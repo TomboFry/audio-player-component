@@ -350,7 +350,11 @@
       };
       const scrub = (e) => {
         const percentage = e.layerX / e.target.offsetWidth;
-        this.#audio.fastSeek(this.#audio.duration * percentage);
+        if (this.#audio.fastSeek) {
+          this.#audio.fastSeek(this.#audio.duration * percentage);
+          return;
+        }
+        this.#audio.currentTime = this.#audio.duration * percentage;
       };
       let mousedown = false;
       progressBar.onmousedown = () => {

@@ -957,6 +957,7 @@
     if (!("mediaSession" in navigator)) return;
     if (nowPlaying === null) {
       navigator.mediaSession.metadata = null;
+      return;
     }
     const metadata = {
       album: nowPlaying.album,
@@ -1003,7 +1004,7 @@
       setIsLoading(true);
       setPlayheadWidth(0);
       audio.src = playlist[nowPlayingIndex.current].src;
-      audio.fastSeek(0);
+      audio.currentTime = 0;
       audio.load();
     };
     const skipForward = () => {
@@ -1063,12 +1064,16 @@
       if (details.action === "seekforward") {
         newTime += details.seekOffset || 5;
       }
-      audio.fastSeek(newTime);
       setNavigatorPositionState({
         duration: audio.duration,
         playbackRate: audio.playbackRate,
         position: audio.currentTime
       });
+      if (details.fastSeek && audio.fastSeek) {
+        audio.fastSeek(newTime);
+        return;
+      }
+      audio.currentTime = newTime;
     };
     const seekEvent = (event) => {
       const percentage = event.layerX / event.target.offsetWidth;
