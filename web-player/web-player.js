@@ -966,9 +966,13 @@
     if (!("mediaSession" in navigator)) return;
     navigator.mediaSession.playbackState = state;
   };
-  var setNavigatorPositionState = (state) => {
+  var setNavigatorPositionState = () => {
     if (!("mediaSession" in navigator)) return;
-    navigator.mediaSession.setPositionState(state);
+    navigator.mediaSession.setPositionState({
+      duration: audio.duration,
+      playbackRate: audio.playbackRate,
+      position: audio.currentTime
+    });
   };
   var setNavigatorMetadata = (nowPlaying) => {
     if (!("mediaSession" in navigator)) return;
@@ -1052,11 +1056,7 @@
           setIsPlaying(true);
           setNavigatorPlaybackState("playing");
           setNavigatorMetadata(nowPlaying());
-          setNavigatorPositionState({
-            duration: audio.duration,
-            playbackRate: audio.playbackRate,
-            position: audio.currentTime
-          });
+          setNavigatorPositionState();
         });
         return;
       }
@@ -1077,11 +1077,7 @@
       if (details.action === "seekforward") {
         newTime += details.seekOffset || 5;
       }
-      setNavigatorPositionState({
-        duration: audio.duration,
-        playbackRate: audio.playbackRate,
-        position: audio.currentTime
-      });
+      setNavigatorPositionState();
       if (details.fastSeek && audio.fastSeek) {
         audio.fastSeek(newTime);
         return;
