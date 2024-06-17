@@ -191,6 +191,7 @@ const setNavigatorMetadata = (nowPlaying: PlaylistItem | null) => {
 	if (!('mediaSession' in navigator)) return;
 	if (nowPlaying === null) {
 		navigator.mediaSession.metadata = null;
+		return;
 	}
 
 	const metadata: MediaMetadataInit = {
