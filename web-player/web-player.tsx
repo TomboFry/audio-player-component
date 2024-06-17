@@ -152,6 +152,20 @@ const PlaylistPanel = (props: PlaylistProps) => {
 		);
 	}
 
+	if (items.length === 0) {
+		items.push(
+			<div className={styles.playlistEmpty}>
+				<p>
+					<strong>There's nothing in the queue.</strong>
+				</p>
+				<p>
+					You can play music by clicking "Play" on any music player, or the plus icon to
+					add it to the end of the queue.
+				</p>
+			</div>,
+		);
+	}
+
 	const classNames = classes({
 		[styles.playlistPanel]: true,
 		[styles.open]: props.open,

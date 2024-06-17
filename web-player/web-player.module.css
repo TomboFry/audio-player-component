@@ -13,6 +13,7 @@
 	--border: #ccc;
 	--border-hover: #ddd;
 	--primary: #3FA9F5;
+	--negative: #CF2222;
 }
 
 .button {
@@ -292,8 +293,17 @@
 
 .playlistItem .removeBtn::before {
 	font-family: 'FontAwesome';
-	color: red;
+	color: var(--negative);
 	content: '\f00d';
+}
+
+.playlistEmpty {
+	padding: 0 16px;
+}
+
+.playlistEmpty p {
+	line-height: 1.4;
+	margin-bottom: 16px;
 }
 
 .disabled {
