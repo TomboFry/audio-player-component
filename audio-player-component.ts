@@ -67,6 +67,14 @@ class AudioPlayer extends HTMLElement {
 
 		const sources = this.getAttribute('sources')?.split(',') ?? [];
 		this.loadAudio(sources);
+
+		this.#audio.onended = () => {
+			this.#audio.currentTime = 0;
+			this.#isPlaying = false;
+			this.#playBtn.innerHTML = AudioPlayer.svgPlay;
+		};
+
+		this.#audio.style.display = 'none';
 	}
 
 	private static padTime(num: number) {
@@ -110,6 +118,7 @@ class AudioPlayer extends HTMLElement {
 
 	private get styleCss() {
 		return `
+		* { line-height: 1; margin: 0; padding: 0; box-sizing: border-box; }
 		.tap--container {
 			width: 100%;
 			position: relative;
@@ -190,6 +199,11 @@ class AudioPlayer extends HTMLElement {
 			--audio-player-border-hover: #bbb;
 			--audio-player-progress: #555;
 			--audio-player-text: #fff;
+		}
+
+		.controls-text {
+			display: inline-block;
+			margin-right: 16px;
 		}
 
 		.tap--button {
@@ -275,6 +289,9 @@ class AudioPlayer extends HTMLElement {
 			.tap--container .tap--controls {
 				margin: 8px;
 			}
+			.controls-text {
+				margin-right: 4px;
+			}
 		}
 		`;
 	}
@@ -330,53 +347,23 @@ class AudioPlayer extends HTMLElement {
 		container.appendChild(metadata);
 	}
 
-	connectedCallback() {
-		this.#shadow.innerHTML = '';
-
-		// Apply CSS and add audio element to DOM
-		this.#shadow.appendChild(AudioPlayer.createElement({ tagName: 'style', textContent: this.styleCss }));
-
-		// Create elements
-		const container = AudioPlayer.createElement({ className: 'tap--container' });
-		if (!this.#isCompact) {
-			const minHeightUnsafe = Number(this.getAttribute('min-height') ?? 280);
-			const minHeight = Number.isSafeInteger(minHeightUnsafe) ? minHeightUnsafe : 280;
-			container.style.minHeight = `${minHeight}px`;
-		}
-
-		this.addOverlayToContainer(container);
+	private createControls() {
+		const useWebPlayer = 'TomboAudioPlayer' in window;
 
 		const controls = AudioPlayer.createElement({ className: 'tap--controls' });
 		if (this.getAttribute('dark') !== null) controls.classList.add('dark');
 
-		const progressBar = AudioPlayer.createElement({ className: 'tap--progress--bar' });
-		const progressPlayhead = AudioPlayer.createElement({ className: 'tap--progress--playhead' });
-		const progressText = AudioPlayer.createElement({ className: 'tap--progress--timestamp' });
+		/* PLAY BUTTON */
+
 		this.#playBtn = AudioPlayer.createElement({
 			tagName: 'button',
 			className: 'tap--button',
 			innerHTML: AudioPlayer.svgPlay,
 		}) as HTMLButtonElement;
+		controls.appendChild(this.#playBtn);
 
-		progressPlayhead.style.backgroundColor =
-			this.getAttribute('colour') || this.getAttribute('color') || '#3FA9F5';
-
-		const setProgressText = () => {
-			const lengthSecs = Number(this.getAttribute('length-secs') ?? 0);
-			const currentMins = AudioPlayer.padTime(Math.floor(this.#audio.currentTime / 60));
-			const currentSecs = AudioPlayer.padTime(Math.floor(this.#audio.currentTime % 60));
-
-			const totalMins = AudioPlayer.padTime(Math.floor((this.#audio.duration || lengthSecs) / 60));
-			const totalSecs = AudioPlayer.padTime(Math.floor((this.#audio.duration || lengthSecs) % 60));
-
-			progressText.innerHTML = `${currentMins}:${currentSecs}<br/>${totalMins}:${totalSecs}`;
-			progressPlayhead.style.width = `${(this.#audio.currentTime * 100) / (this.#audio.duration || 1)}%`;
-		};
-
-		// User interaction
 		this.#playBtn.onclick = () => {
-			// @ts-expect-error
-			if (window.TomboAudioPlayer?.addToPlaylistAndPlay) {
+			if (useWebPlayer) {
 				// @ts-expect-error
 				window.TomboAudioPlayer.addToPlaylistAndPlay({
 					title: this.#songTitle,
@@ -392,6 +379,74 @@ class AudioPlayer extends HTMLElement {
 			if (!this.#isPlaying) return this.play();
 			this.pause();
 		};
+
+		if (useWebPlayer) {
+			controls.appendChild(
+				AudioPlayer.createElement({
+					tagName: 'span',
+					className: 'controls-text',
+					textContent: 'Play Now',
+				}),
+			);
+		}
+
+		/* ADD TO PLAYLIST BUTTON */
+
+		if (useWebPlayer) {
+			const addToPlaylist = AudioPlayer.createElement({
+				tagName: 'button',
+				className: 'tap--button',
+				innerHTML: AudioPlayer.svgPlus,
+			});
+			addToPlaylist.onclick = () => {
+				// @ts-expect-error
+				window.TomboAudioPlayer.addToPlaylist({
+					title: this.#songTitle,
+					album: this.#songAlbum,
+					artist: this.#songArtist,
+					src: this.#audio.src,
+					imageSrc: this.getAttribute('image'),
+				});
+			};
+			controls.appendChild(addToPlaylist);
+			controls.appendChild(
+				AudioPlayer.createElement({
+					tagName: 'span',
+					className: 'controls-text',
+					textContent: 'Add To Queue',
+				}),
+			);
+			return controls;
+		}
+
+		/* PLAYHEAD */
+
+		const progressBar = AudioPlayer.createElement({ className: 'tap--progress--bar' });
+		const progressPlayhead = AudioPlayer.createElement({ className: 'tap--progress--playhead' });
+		const progressText = AudioPlayer.createElement({ className: 'tap--progress--timestamp' });
+
+		progressPlayhead.style.backgroundColor =
+			this.getAttribute('colour') || this.getAttribute('color') || '#3FA9F5';
+
+		progressBar.appendChild(progressPlayhead);
+		controls.appendChild(progressBar);
+		controls.appendChild(progressText);
+
+		const setProgressText = () => {
+			const lengthSecs = Number(this.getAttribute('length-secs') ?? 0);
+			const currentMins = AudioPlayer.padTime(Math.floor(this.#audio.currentTime / 60));
+			const currentSecs = AudioPlayer.padTime(Math.floor(this.#audio.currentTime % 60));
+
+			const totalMins = AudioPlayer.padTime(Math.floor((this.#audio.duration || lengthSecs) / 60));
+			const totalSecs = AudioPlayer.padTime(Math.floor((this.#audio.duration || lengthSecs) % 60));
+
+			progressText.innerHTML = `${currentMins}:${currentSecs}<br/>${totalMins}:${totalSecs}`;
+			progressPlayhead.style.width = `${(this.#audio.currentTime * 100) / (this.#audio.duration || 1)}%`;
+		};
+
+		setProgressText();
+		this.#audio.ondurationchange = setProgressText;
+		this.#audio.ontimeupdate = setProgressText;
 
 		const scrub = (e: MouseEvent) => {
 			const percentage = e.layerX / (e.target as HTMLDivElement).offsetWidth;
@@ -415,43 +470,26 @@ class AudioPlayer extends HTMLElement {
 		progressBar.onmousemove = e => mousedown && scrub(e);
 		progressBar.onclick = scrub;
 
-		progressBar.appendChild(progressPlayhead);
+		return controls;
+	}
 
-		controls.appendChild(this.#playBtn);
-		controls.appendChild(progressBar);
-		controls.appendChild(progressText);
+	connectedCallback() {
+		this.#shadow.innerHTML = '';
 
-		// @ts-expect-error
-		if (window.TomboAudioPlayer?.addToPlaylist) {
-			const addToPlaylist = AudioPlayer.createElement({
-				tagName: 'button',
-				className: 'tap--button',
-				innerHTML: AudioPlayer.svgPlus,
-			});
-			addToPlaylist.onclick = () => {
-				// @ts-expect-error
-				window.TomboAudioPlayer.addToPlaylist({
-					title: this.#songTitle,
-					album: this.#songAlbum,
-					artist: this.#songArtist,
-					src: this.#audio.src,
-					imageSrc: this.getAttribute('image'),
-				});
-			};
-			controls.appendChild(addToPlaylist);
+		// Apply CSS and add audio element to DOM
+		this.#shadow.appendChild(AudioPlayer.createElement({ tagName: 'style', textContent: this.styleCss }));
+
+		// Create elements
+		const container = AudioPlayer.createElement({ className: 'tap--container' });
+		if (!this.#isCompact) {
+			const minHeightUnsafe = Number(this.getAttribute('min-height') ?? 280);
+			const minHeight = Number.isSafeInteger(minHeightUnsafe) ? minHeightUnsafe : 280;
+			container.style.minHeight = `${minHeight}px`;
 		}
 
-		setProgressText();
-		this.#audio.ondurationchange = setProgressText;
-		this.#audio.ontimeupdate = setProgressText;
+		this.addOverlayToContainer(container);
 
-		this.#audio.onended = () => {
-			this.#audio.currentTime = 0;
-			this.#isPlaying = false;
-			this.#playBtn.innerHTML = AudioPlayer.svgPlay;
-		};
-
-		this.#audio.style.display = 'none';
+		const controls = this.createControls();
 
 		if (this.#isCompact) {
 			this.#shadow.appendChild(controls);
@@ -484,7 +522,7 @@ class AudioPlayer extends HTMLElement {
 
 	public stop() {
 		this.pause();
-		this.#audio.fastSeek(0);
+		this.#audio.currentTime = 0;
 	}
 }
 
