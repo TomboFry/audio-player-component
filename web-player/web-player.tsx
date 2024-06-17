@@ -247,7 +247,7 @@ const Player = props => {
 		setIsLoading(true);
 		setPlayheadWidth(0);
 		audio.src = playlist[nowPlayingIndex.current].src;
-		audio.fastSeek(0);
+		audio.currentTime = 0;
 		audio.load();
 	};
 
@@ -318,12 +318,18 @@ const Player = props => {
 			newTime += details.seekOffset || 5;
 		}
 
-		audio.fastSeek(newTime);
 		setNavigatorPositionState({
 			duration: audio.duration,
 			playbackRate: audio.playbackRate,
 			position: audio.currentTime,
 		});
+
+		if (details.fastSeek && audio.fastSeek) {
+			audio.fastSeek(newTime);
+			return;
+		}
+
+		audio.currentTime = newTime;
 	};
 
 	const seekEvent = (event: MouseEvent) => {

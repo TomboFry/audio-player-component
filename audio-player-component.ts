@@ -395,7 +395,11 @@ class AudioPlayer extends HTMLElement {
 
 		const scrub = (e: MouseEvent) => {
 			const percentage = e.layerX / (e.target as HTMLDivElement).offsetWidth;
-			this.#audio.fastSeek(this.#audio.duration * percentage);
+			if (this.#audio.fastSeek) {
+				this.#audio.fastSeek(this.#audio.duration * percentage);
+				return;
+			}
+			this.#audio.currentTime = this.#audio.duration * percentage;
 		};
 
 		let mousedown = false;
