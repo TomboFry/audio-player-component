@@ -998,6 +998,7 @@
     const [isLoading, setIsLoading] = p2(false);
     const [isPlaying, setIsPlaying] = p2(false);
     const [playlist, setPlaylist] = p2([]);
+    const nowPlaying = () => nowPlayingIndex.current === null ? null : playlist[nowPlayingIndex.current];
     _2(() => {
       audio.onended = () => {
         if (nowPlayingIndex.current === playlist.length - 1) {
@@ -1005,8 +1006,6 @@
         }
         skipForward();
       };
-    }, [playlist.length]);
-    _2(() => {
       if (!("mediaSession" in navigator)) return;
       navigator.mediaSession.setActionHandler("pause", () => playPause(true));
       navigator.mediaSession.setActionHandler("play", () => playPause(false));
@@ -1016,8 +1015,7 @@
       navigator.mediaSession.setActionHandler("seekbackward", seek);
       navigator.mediaSession.setActionHandler("seekforward", seek);
       navigator.mediaSession.setActionHandler("seekto", seek);
-    }, []);
-    const nowPlaying = () => nowPlayingIndex.current === null ? null : playlist[nowPlayingIndex.current];
+    }, [playlist]);
     const setupAudioPlayer = () => {
       if (nowPlayingIndex.current === null) return;
       setIsLoading(true);
@@ -1045,7 +1043,7 @@
       if (typeof playingOverride === "boolean") {
         actualIsPlaying = playingOverride;
       }
-      if (nowPlaying() === null && actualIsPlaying) {
+      if (nowPlaying() === null && !actualIsPlaying) {
         if (playlist.length === 0) return;
         nowPlayingIndex.current = 0;
         setupAudioPlayer();
