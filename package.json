@@ -1,25 +1,25 @@
 {
-  "name": "audio-player-component",
-  "version": "0.0.1",
-  "main": "index.js",
-  "scripts": {
-    "build": "esbuild audio-player-component.ts --platform=browser --bundle --outfile=dist/audio-player-component.js",
-    "build:min": "npm run build -- --minify-syntax --minify-identifiers --outfile=dist/audio-player-component.min.js",
-    "build:web-player": "esbuild ./web-player/web-player.tsx --bundle --platform=browser --outfile=dist/web-player/web-player.js",
-    "build:web-player:min": "npm run build:web-player -- --minify --outfile=dist/web-player/web-player.min.js",
-    "lint": "biome check audio-player-component.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "Tom Gardiner <tom@tombofry.co.uk>",
-  "license": "AGPL-3.0-only",
-  "description": "",
-  "devDependencies": {
-    "@biomejs/biome": "^1.8.0",
-    "esbuild": "^0.21.4",
-    "preact": "^10.22.0",
-    "react-to-webcomponent": "^2.0.0",
-    "typescript": "^5.4.5",
-    "typescript-plugin-css-modules": "^5.1.0"
-  }
+	"name": "audio-player-component",
+	"version": "0.0.1",
+	"main": "index.js",
+	"scripts": {
+		"build": "esbuild audio-player-component.ts --platform=browser --bundle --outfile=dist/audio-player-component.js",
+		"build:min": "npm run build -- --minify-syntax --minify-identifiers --outfile=dist/audio-player-component.min.js",
+		"build:web-player": "esbuild ./web-player/web-player.tsx --bundle --platform=browser --outfile=dist/web-player/web-player.js",
+		"build:web-player:min": "npm run build:web-player -- --minify --outfile=dist/web-player/web-player.min.js",
+		"lint": "biome check audio-player-component.ts",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [],
+	"author": "Tom Gardiner <tom@tombofry.co.uk>",
+	"license": "AGPL-3.0-only",
+	"description": "",
+	"devDependencies": {
+		"@biomejs/biome": "^1.8.0",
+		"esbuild": "^0.21.4",
+		"preact": "^10.22.0",
+		"react-to-webcomponent": "^2.0.0",
+		"typescript": "^5.4.5",
+		"typescript-plugin-css-modules": "^5.1.0"
+	}
 }

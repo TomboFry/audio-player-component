@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import styles from './web-player.module.css';
 import type { CSSProperties } from 'preact/compat';
 
+const audio = new Audio();
+
 const classes = (classList: Record<string, boolean> | string[]): string => {
 	if (Array.isArray(classList)) return classList.join(' ');
 
@@ -178,7 +180,6 @@ const FloatingButton = (props: FloatingButtonProps) => {
 	return <div onClick={props.onClick} className={className} style={style} />;
 };
 
-const audio = new Audio();
 const setNavigatorPlaybackState = (state: MediaSessionPlaybackState) => {
 	if (!('mediaSession' in navigator)) return;
 	navigator.mediaSession.playbackState = state;
@@ -207,7 +208,11 @@ const setNavigatorMetadata = (nowPlaying: PlaylistItem | null) => {
 	navigator.mediaSession.metadata = new MediaMetadata(metadata);
 };
 
-const Player = props => {
+interface PlayerProps {
+	css: string;
+}
+
+const Player = (props: PlayerProps) => {
 	const [playPanelOpen, setPlayPanelOpen] = useState(false);
 	const [playlistPanelOpen, setPlaylistPanelOpen] = useState(false);
 	const [playlistPanelClosing, setPlaylistPanelClosing] = useState(false);
