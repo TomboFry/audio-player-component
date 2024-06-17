@@ -80,17 +80,26 @@ const PlayButtons = (props: PlayButtonsProps) => {
 interface PlayheadProps {
 	onClick: (event: MouseEvent) => void;
 	buttonsEnabled: boolean;
-	playheadPosition: number;
 }
 
 const Playhead = (props: PlayheadProps) => {
+	const [playheadWidth, setPlayheadWidth] = useState(0);
+
+	useEffect(() => {
+		for (const eventName of ['timeupdate', 'ended']) {
+			audio.addEventListener(eventName, () => {
+				setPlayheadWidth((100 * audio.currentTime) / (audio.duration || 1));
+			});
+		}
+	}, []);
+
 	const classNames = classes({
 		[styles.playheadContainer]: true,
 		[styles.disabled]: !props.buttonsEnabled,
 	});
 	return (
 		<div onClick={props.onClick} className={classNames}>
-			<div style={{ width: `${props.playheadPosition * 100}%` }} className={styles.playheadControl} />
+			<div style={{ width: `${playheadWidth}%` }} className={styles.playheadControl} />
 		</div>
 	);
 };
@@ -220,21 +229,18 @@ const Player = (props: PlayerProps) => {
 	const nowPlayingIndex = useRef<number | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [isPlaying, setIsPlaying] = useState(false);
-	const [playheadWidth, setPlayheadWidth] = useState(0);
 	const [playlist, setPlaylist] = useState<PlaylistItem[]>([]);
 
 	useEffect(() => {
-		audio.ontimeupdate = _ => {
-			setPlayheadWidth(audio.currentTime / (audio.duration || 1));
-		};
-
-		audio.onended = _ => {
+		audio.onended = () => {
 			if (nowPlayingIndex.current === playlist.length - 1) {
 				stop();
 			}
 			skipForward();
 		};
+	}, [playlist.length]);
 
+	useEffect(() => {
 		if (!('mediaSession' in navigator)) return;
 		navigator.mediaSession.setActionHandler('pause', () => playPause(true));
 		navigator.mediaSession.setActionHandler('play', () => playPause(false));
@@ -244,13 +250,12 @@ const Player = (props: PlayerProps) => {
 		navigator.mediaSession.setActionHandler('seekbackward', seek);
 		navigator.mediaSession.setActionHandler('seekforward', seek);
 		navigator.mediaSession.setActionHandler('seekto', seek);
-	}, [playlist.length]);
+	}, []);
 
 	const nowPlaying = () => (nowPlayingIndex.current === null ? null : playlist[nowPlayingIndex.current]);
 	const setupAudioPlayer = () => {
 		if (nowPlayingIndex.current === null) return;
 		setIsLoading(true);
-		setPlayheadWidth(0);
 		audio.src = playlist[nowPlayingIndex.current].src;
 		audio.currentTime = 0;
 		audio.load();
@@ -270,8 +275,6 @@ const Player = (props: PlayerProps) => {
 		audio.pause();
 		nowPlayingIndex.current = null;
 		setIsPlaying(false);
-		setPlayheadWidth(0);
-
 		setNavigatorPlaybackState('none');
 		setNavigatorMetadata(null);
 	};
@@ -418,11 +421,7 @@ const Player = (props: PlayerProps) => {
 						isPlaying={isPlaying}
 						isLoading={isLoading}
 					/>
-					<Playhead
-						buttonsEnabled={!!nowPlaying()}
-						playheadPosition={playheadWidth}
-						onClick={seekEvent}
-					/>
+					<Playhead buttonsEnabled={!!nowPlaying()} onClick={seekEvent} />
 					<PlaylistToggle
 						open={playlistPanelOpen}
 						togglePanel={togglePlaylistPanelOpen}
