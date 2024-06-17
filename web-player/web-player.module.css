@@ -14,6 +14,7 @@
 	--border-hover: #ddd;
 	--primary: #3FA9F5;
 	--negative: #CF2222;
+	--highlight: #ffeebb;
 }
 
 .button {
@@ -127,8 +128,10 @@
 }
 
 .playbackControlButton.playPauseBtn {
-	width: 36px;
-	height: 36px;
+	width: 48px;
+	height: 48px;
+	margin: 0 4px;
+	font-size: 26px;
 }
 
 .playbackControlButton.playPauseBtn::before {
@@ -185,11 +188,16 @@
 }
 
 .playlistToggleButton {
-	width: 48px;
-	height: 48px;
+	width: 30px;
+	height: 30px;
 	margin: 8px;
-	font-size: 20px;
+	font-size: 16px;
 	font-family: 'FontAwesome';
+}
+
+.playlistToggleButton.open {
+	background-color: var(--primary);
+	color: var(--button);
 }
 
 .playlistToggleButton::before {
@@ -243,15 +251,34 @@
 
 .playlistItem {
 	cursor: pointer;
-	margin-bottom: 8px;
 	width: 100%;
-	padding: 0 8px 8px;
+	padding: 8px;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	display: flex;
 	flex-direction: row;
 	align-items: center;
+	background-color: var(--panel);
+}
+
+.playlistItem.newItem {
+	animation: 3s playlist-item-add 1;
+
+}
+
+.playlistItem:last-of-type {
+	margin-bottom: 8px;
+}
+
+@keyframes playlist-item-add {
+	from {
+		background-color: var(--highlight);
+	}
+
+	to {
+		background-color: var(--panel);
+	}
 }
 
 .playlistItem .playIndicator {
@@ -318,7 +345,7 @@
 	}
 }
 
-@media (max-width: 480px) {
+@media (max-width: 512px) {
 
 	.container,
 	.floatingButton {

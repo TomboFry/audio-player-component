@@ -130,12 +130,19 @@ interface PlaylistProps {
 }
 
 const PlaylistPanel = (props: PlaylistProps) => {
+	const playlistPreviousLength = useRef(0);
+
+	useEffect(() => {
+		playlistPreviousLength.current = props.playlist.length;
+	}, [props.playlist.length]);
+
 	const items = [];
 	for (let i = 0; i < props.playlist.length; i++) {
 		const { title, album, src } = props.playlist[i];
 		const classNames = classes({
 			[styles.playlistItem]: true,
 			[styles.currentlyPlaying]: props.nowPlayingIndex === i,
+			[styles.newItem]: i >= playlistPreviousLength.current,
 		});
 		items.push(
 			<div key={src} className={classNames}>
@@ -254,6 +261,7 @@ const Player = (props: PlayerProps) => {
 		audio.onended = () => {
 			if (nowPlayingIndex.current === playlist.length - 1) {
 				stop();
+				return;
 			}
 			skipForward();
 		};
@@ -289,6 +297,7 @@ const Player = (props: PlayerProps) => {
 
 	const stop = () => {
 		audio.pause();
+		audio.currentTime = 0;
 		nowPlayingIndex.current = null;
 		setIsPlaying(false);
 		setNavigatorPlaybackState('none');
@@ -391,6 +400,10 @@ const Player = (props: PlayerProps) => {
 	};
 
 	const addToPlaylist = (items: PlaylistItem | PlaylistItem[]) => {
+		if (playlist.length === 0) {
+			setPlayPanelOpen(true);
+			setPlaylistPanelOpen(true);
+		}
 		setPlaylist(list => list.concat(items));
 	};
 
@@ -399,10 +412,10 @@ const Player = (props: PlayerProps) => {
 		setPlayPanelOpen(true);
 		addToPlaylist(items);
 
-		//! This is a big hack - we want to make sure the `playSong`
-		//! function has at least the first song in array by the time we
-		//! play it, but the `addToPlaylist` function will only update
-		//! the array by the next render.
+		// ! This is a big hack - we want to make sure the `playSong`
+		// ! function has at least the first song in array by the time
+		// ! we play it, but the `addToPlaylist` function will only
+		// ! update the array by the next render.
 		playlist.push(Array.isArray(items) ? items[0] : items);
 
 		playSong(len);
