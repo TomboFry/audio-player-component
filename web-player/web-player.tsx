@@ -207,9 +207,13 @@ const setNavigatorPlaybackState = (state: MediaSessionPlaybackState) => {
 	if (!('mediaSession' in navigator)) return;
 	navigator.mediaSession.playbackState = state;
 };
-const setNavigatorPositionState = (state: MediaPositionState) => {
+const setNavigatorPositionState = () => {
 	if (!('mediaSession' in navigator)) return;
-	navigator.mediaSession.setPositionState(state);
+	navigator.mediaSession.setPositionState({
+		duration: audio.duration,
+		playbackRate: audio.playbackRate,
+		position: audio.currentTime,
+	});
 };
 const setNavigatorMetadata = (nowPlaying: PlaylistItem | null) => {
 	if (!('mediaSession' in navigator)) return;
@@ -311,11 +315,7 @@ const Player = (props: PlayerProps) => {
 				setIsPlaying(true);
 				setNavigatorPlaybackState('playing');
 				setNavigatorMetadata(nowPlaying());
-				setNavigatorPositionState({
-					duration: audio.duration,
-					playbackRate: audio.playbackRate,
-					position: audio.currentTime,
-				});
+				setNavigatorPositionState();
 			});
 			return;
 		}
@@ -340,11 +340,7 @@ const Player = (props: PlayerProps) => {
 			newTime += details.seekOffset || 5;
 		}
 
-		setNavigatorPositionState({
-			duration: audio.duration,
-			playbackRate: audio.playbackRate,
-			position: audio.currentTime,
-		});
+		setNavigatorPositionState();
 
 		if (details.fastSeek && audio.fastSeek) {
 			audio.fastSeek(newTime);
