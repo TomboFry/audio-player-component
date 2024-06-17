@@ -107,18 +107,22 @@ exposes some functions you can use to queue/play songs, under
 `window.TomboAudioPlayer`:
 
 * `addToPlaylist({ title, artist, album, src, imageSrc })`
-  * `title` (string)
-  * `album` (string)
-  * `artist` (string, optional)
   * `src` (string) URL to audio file
-  * `imageSrc` (string) URL to image - cover art, thumbnail, etc.
+  * `title` (string)
+  * `album` (string, optional)
+  * `artist` (string, optional)
+  * `imageSrc` (string, optional) URL to image - cover art, thumbnail, etc.
 * `addToPlaylistAndPlay({ title, artist, album, src, imageSrc })`
   * Uses the same properties as above
+* `loadPlaylistFromJson(url, playImmediately)` (async, returns a Promise)
+  * `url` (string) URL to JSON file - an array of objects, using the same
+    structure as above.
+  * `playImmediately` (boolean, optional) Defaults to `false`.
 * `playPause()`
 * `skipBack()`
 * `skipForward()`
 
-eg.
+#### Add To Playlist
 
 ```js
 window.TomboAudioPlayer.addToPlaylistAndPlay({
@@ -128,4 +132,33 @@ window.TomboAudioPlayer.addToPlaylistAndPlay({
   src: '/path/to/audio.mp3',
   imageSrc: '/path/to/folder.jpg'
 });
+```
+
+You can also add multiple in one go, by providing an array of songs instead:
+
+```js
+window.TomboAudioPlayer.addToPlaylistAndPlay([
+  { src: '/path/to/audio1.mp3', title: 'Song 1' },
+  { src: '/path/to/audio2.mp3' /* etc. */ },
+  { src: '/path/to/audio3.mp3' },
+])
+```
+
+#### Load Playlist From JSON
+
+Alternatively, you can load an entire playlist from a JSON file, which is an
+array containing the same structure as above.
+
+`/path/to/playlist.json`:
+
+```json
+[
+  { "src": "/path/to/audio1.mp3", "title": "Song 1" },
+  { "src": "/path/to/audio2.mp3", "title": "Song 2", "artist": "Blur" },
+  { "src": "/path/to/audio3.mp3", "title": "Song 3" }
+]
+```
+
+```js
+window.TomboAudioPlayer.loadPlaylistFromJson('/path/to/playlist.json', true);
 ```

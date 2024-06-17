@@ -1105,14 +1105,27 @@
       }, 150);
     };
     const togglePlayPanelOpen = () => setPlayPanelOpen((open) => !open);
-    const addToPlaylist = (item) => {
-      setPlaylist((list) => [...list, item]);
+    const loadPlaylistFromJson = async (url, playImmediately = false) => {
+      const json = await (await fetch(url)).json();
+      if (!(Array.isArray(json) && json.every((item) => !!item.src))) {
+        throw new Error(
+          "JSON contains invalid data - must be an array of objects, containing at minimum `src`."
+        );
+      }
+      if (playImmediately) {
+        addToPlaylistAndPlay(json);
+        return;
+      }
+      addToPlaylist(json);
     };
-    const addToPlaylistAndPlay = (item) => {
+    const addToPlaylist = (items) => {
+      setPlaylist((list) => list.concat(items));
+    };
+    const addToPlaylistAndPlay = (items) => {
       const len = playlist.length;
       setPlayPanelOpen(true);
-      addToPlaylist(item);
-      playlist.push(item);
+      addToPlaylist(items);
+      playlist.push(Array.isArray(items) ? items[0] : items);
       playSong(len);
     };
     const removeFromPlaylist = (index) => {
@@ -1134,7 +1147,8 @@
       addToPlaylistAndPlay,
       playPause,
       skipBack,
-      skipForward
+      skipForward,
+      loadPlaylistFromJson
     };
     const playPanelClasses = classes({
       [web_player_default.playPanel]: true,
@@ -1199,3 +1213,7 @@
     window.customElements.define("web-player", WebPlayer);
   })();
 })();
+//! This is a big hack - we want to make sure the `playSong`
+//! function has at least the first song in array by the time we
+//! play it, but the `addToPlaylist` function will only update
+//! the array by the next render.
