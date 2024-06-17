@@ -364,17 +364,14 @@ const Player = (props: PlayerProps) => {
 	const togglePlayPanelOpen = () => setPlayPanelOpen(open => !open);
 
 	const addToPlaylist = (item: PlaylistItem) => {
-		setPlaylist(list => {
-			list.push(item);
-			return list;
-		});
-		setPlaylistPanelOpen(true);
+		setPlaylist(list => [...list, item]);
 	};
 
 	const addToPlaylistAndPlay = (item: PlaylistItem) => {
 		const len = playlist.length;
 		setPlayPanelOpen(true);
 		addToPlaylist(item);
+		playlist.push(item);
 		playSong(len);
 	};
 
@@ -386,8 +383,9 @@ const Player = (props: PlayerProps) => {
 			nowPlayingIndex.current -= 1;
 		}
 		setPlaylist(list => {
-			list.splice(index, 1);
-			return list;
+			const newList = [...list];
+			newList.splice(index, 1);
+			return newList;
 		});
 	};
 
