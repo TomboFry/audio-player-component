@@ -34,9 +34,9 @@ const NowPlaying = ({ nowPlaying, togglePanel }: NowPlayingProps) => {
 	const { title, album } = nowPlaying ?? { title: 'Nothing is playing right now.' };
 
 	return (
-		<div onClick={togglePanel} className={styles.nowPlaying}>
-			<div className={styles.metadataTitle}>{title}</div>
-			<div className={styles.metadataAlbum}>{album}</div>
+		<div onClick={togglePanel} class={styles.nowPlaying}>
+			<div class={styles.metadataTitle}>{title}</div>
+			<div class={styles.metadataAlbum}>{album}</div>
 		</div>
 	);
 };
@@ -57,20 +57,20 @@ const PlayButtons = (props: PlayButtonsProps) => {
 		[styles.disabled]: !props.buttonsEnabled,
 	};
 	return (
-		<div className={styles.playbackButtons}>
-			<div onClick={props.skipBack} className={classes(classNames)}>
+		<div class={styles.playbackButtons}>
+			<div onClick={props.skipBack} class={classes(classNames)}>
 				{'\uf049'}
 			</div>
 			<div
 				onClick={props.playPause}
-				className={classes({
+				class={classes({
 					...classNames,
 					[styles.playing]: props.isPlaying && !props.isLoading,
 					[styles.loading]: props.isLoading,
 					[styles.playPauseBtn]: true,
 				})}
 			/>
-			<div onClick={props.skipForward} className={classes(classNames)}>
+			<div onClick={props.skipForward} class={classes(classNames)}>
 				{'\uf050'}
 			</div>
 		</div>
@@ -98,8 +98,8 @@ const Playhead = (props: PlayheadProps) => {
 		[styles.disabled]: !props.buttonsEnabled,
 	});
 	return (
-		<div onClick={props.onClick} className={classNames}>
-			<div style={{ width: `${playheadWidth}%` }} className={styles.playheadControl} />
+		<div onClick={props.onClick} class={classNames}>
+			<div style={{ width: `${playheadWidth}%` }} class={styles.playheadControl} />
 		</div>
 	);
 };
@@ -145,14 +145,14 @@ const PlaylistPanel = (props: PlaylistProps) => {
 			[styles.newItem]: i >= playlistPreviousLength.current,
 		});
 		items.push(
-			<div key={src} className={classNames}>
-				<div className={styles.playIndicator}> </div>
-				<div className={styles.metadata} onClick={() => props.playSong(i)}>
-					<div className={styles.title}>{title}</div>
-					<div className={styles.album}>{album}</div>
+			<div key={src} class={classNames}>
+				<div class={styles.playIndicator}> </div>
+				<div class={styles.metadata} onClick={() => props.playSong(i)}>
+					<div class={styles.title}>{title}</div>
+					<div class={styles.album}>{album}</div>
 				</div>
 				<div
-					className={classes([styles.removeBtn, styles.button])}
+					class={classes([styles.removeBtn, styles.button])}
 					onClick={() => props.removeSong(i)}
 				/>
 			</div>,
@@ -161,7 +161,7 @@ const PlaylistPanel = (props: PlaylistProps) => {
 
 	if (items.length === 0) {
 		items.push(
-			<div className={styles.playlistEmpty}>
+			<div class={styles.playlistEmpty}>
 				<p>
 					<strong>There's nothing in the queue.</strong>
 				</p>
@@ -454,8 +454,8 @@ const Player = (props: PlayerProps) => {
 	return (
 		<>
 			<link rel="stylesheet" type="text/css" href={props.css} />
-			<div className={styles.container}>
-				<div className={playPanelClasses}>
+			<div class={styles.container}>
+				<div class={playPanelClasses}>
 					<NowPlaying togglePanel={togglePlaylistPanelOpen} nowPlaying={nowPlaying()} />
 					<PlayButtons
 						buttonsEnabled={!!nowPlaying()}
