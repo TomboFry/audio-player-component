@@ -113,10 +113,11 @@ const PlaylistToggle = (props: PlaylistToggleProps) => {
 	const classNames = classes({
 		[styles.button]: true,
 		[styles.playlistToggleButton]: true,
+		[styles.right]: true,
 		[styles.open]: props.open,
 	});
 
-	return <div onClick={props.togglePanel} className={classNames} />;
+	return <div data-tooltip="Open/Close Queue" onClick={props.togglePanel} class={classNames} />;
 };
 
 interface PlaylistProps {
@@ -179,8 +180,12 @@ const PlaylistPanel = (props: PlaylistProps) => {
 		[styles.closing]: props.closing,
 	});
 	return (
-		<div className={classNames}>
-			<div className={styles.playlistTitle} onClick={props.closePanel}>
+		<div class={classNames}>
+			<div
+				class={styles.playlistTitle}
+				data-tooltip="Click to close queue"
+				onClick={props.closePanel}
+			>
 				Play Queue
 			</div>
 			{items}
@@ -192,6 +197,7 @@ interface FloatingButtonProps {
 	nowPlaying: PlaylistItem | null;
 	isPlaying: boolean;
 	onClick: () => void;
+	playPanelOpen: boolean;
 }
 
 const FloatingButton = (props: FloatingButtonProps) => {
@@ -204,10 +210,13 @@ const FloatingButton = (props: FloatingButtonProps) => {
 	const className = classes({
 		[styles.button]: true,
 		[styles.floatingButton]: true,
+		[styles.left]: true,
 		[styles.hasImage]: imageSrc && props.isPlaying,
 	});
 
-	return <div onClick={props.onClick} className={className} style={style} />;
+	const tooltipText = props.playPanelOpen ? 'Close Player' : 'Open Player';
+
+	return <div data-tooltip={tooltipText} onClick={props.onClick} class={className} style={style} />;
 };
 
 const setNavigatorPlaybackState = (state: MediaSessionPlaybackState) => {
@@ -484,6 +493,7 @@ const Player = (props: PlayerProps) => {
 					isPlaying={isPlaying}
 					nowPlaying={nowPlaying()}
 					onClick={togglePlayPanelOpen}
+					playPanelOpen={playPanelOpen}
 				/>
 			</div>
 		</>

@@ -61,6 +61,36 @@
 	content: '';
 }
 
+[data-tooltip] {
+	&::after {
+		font-family: unset;
+		display: none;
+		position: absolute;
+		bottom: calc(100% + 10px);
+		content: attr(data-tooltip);
+		border-radius: 6px;
+		background-color: #333;
+		color: #fff;
+		font-size: 12px;
+		padding: 4px 8px;
+		text-align: center;
+		min-width: 80px;
+		z-index: 2;
+	}
+
+	&.left::after {
+		left: 0;
+	}
+
+	&.right::after {
+		right: 0;
+	}
+
+	&:hover::after {
+		display: block;
+	}
+}
+
 .container {
 	display: block;
 	position: fixed;
