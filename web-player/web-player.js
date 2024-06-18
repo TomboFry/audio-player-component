@@ -801,6 +801,8 @@
     floatingButton: "web_player_floatingButton",
     hasImage: "web_player_hasImage",
     spinner: "web_player_spinner",
+    left: "web_player_left",
+    right: "web_player_right",
     container: "web_player_container",
     "container-hide": "web_player_container-hide",
     playPanel: "web_player_playPanel",
@@ -820,16 +822,17 @@
     "playlist-panel-show": "web_player_playlist-panel-show",
     closing: "web_player_closing",
     "playlist-panel-hide": "web_player_playlist-panel-hide",
+    playlistItems: "web_player_playlistItems",
     playlistTitle: "web_player_playlistTitle",
     playlistItem: "web_player_playlistItem",
     newItem: "web_player_newItem",
     "playlist-item-add": "web_player_playlist-item-add",
+    currentlyPlaying: "web_player_currentlyPlaying",
     playIndicator: "web_player_playIndicator",
+    removeBtn: "web_player_removeBtn",
     metadata: "web_player_metadata",
     title: "web_player_title",
     album: "web_player_album",
-    currentlyPlaying: "web_player_currentlyPlaying",
-    removeBtn: "web_player_removeBtn",
     playlistEmpty: "web_player_playlistEmpty",
     disabled: "web_player_disabled"
   };
@@ -858,9 +861,9 @@
   };
   var NowPlaying = ({ nowPlaying, togglePanel }) => {
     const { title, album } = nowPlaying ?? { title: "Nothing is playing right now." };
-    return /* @__PURE__ */ u3("div", { onClick: togglePanel, className: web_player_default.nowPlaying, children: [
-      /* @__PURE__ */ u3("div", { className: web_player_default.metadataTitle, children: title }),
-      /* @__PURE__ */ u3("div", { className: web_player_default.metadataAlbum, children: album })
+    return /* @__PURE__ */ u3("div", { onClick: togglePanel, class: web_player_default.nowPlaying, children: [
+      /* @__PURE__ */ u3("div", { class: web_player_default.metadataTitle, children: title }),
+      /* @__PURE__ */ u3("div", { class: web_player_default.metadataAlbum, children: album })
     ] });
   };
   var PlayButtons = (props) => {
@@ -869,13 +872,13 @@
       [web_player_default.playbackControlButton]: true,
       [web_player_default.disabled]: !props.buttonsEnabled
     };
-    return /* @__PURE__ */ u3("div", { className: web_player_default.playbackButtons, children: [
-      /* @__PURE__ */ u3("div", { onClick: props.skipBack, className: classes(classNames), children: "\uF049" }),
+    return /* @__PURE__ */ u3("div", { class: web_player_default.playbackButtons, children: [
+      /* @__PURE__ */ u3("div", { onClick: props.skipBack, class: classes(classNames), children: "\uF049" }),
       /* @__PURE__ */ u3(
         "div",
         {
           onClick: props.playPause,
-          className: classes({
+          class: classes({
             ...classNames,
             [web_player_default.playing]: props.isPlaying && !props.isLoading,
             [web_player_default.loading]: props.isLoading,
@@ -883,7 +886,7 @@
           })
         }
       ),
-      /* @__PURE__ */ u3("div", { onClick: props.skipForward, className: classes(classNames), children: "\uF050" })
+      /* @__PURE__ */ u3("div", { onClick: props.skipForward, class: classes(classNames), children: "\uF050" })
     ] });
   };
   var Playhead = (props) => {
@@ -899,15 +902,16 @@
       [web_player_default.playheadContainer]: true,
       [web_player_default.disabled]: !props.buttonsEnabled
     });
-    return /* @__PURE__ */ u3("div", { onClick: props.onClick, className: classNames, children: /* @__PURE__ */ u3("div", { style: { width: `${playheadWidth}%` }, className: web_player_default.playheadControl }) });
+    return /* @__PURE__ */ u3("div", { onClick: props.onClick, class: classNames, children: /* @__PURE__ */ u3("div", { style: { width: `${playheadWidth}%` }, class: web_player_default.playheadControl }) });
   };
   var PlaylistToggle = (props) => {
     const classNames = classes({
       [web_player_default.button]: true,
       [web_player_default.playlistToggleButton]: true,
+      [web_player_default.right]: true,
       [web_player_default.open]: props.open
     });
-    return /* @__PURE__ */ u3("div", { onClick: props.togglePanel, className: classNames });
+    return /* @__PURE__ */ u3("div", { "data-tooltip": "Open/Close Queue", onClick: props.togglePanel, class: classNames });
   };
   var PlaylistPanel = (props) => {
     const playlistPreviousLength = F2(0);
@@ -923,16 +927,16 @@
         [web_player_default.newItem]: i4 >= playlistPreviousLength.current
       });
       items.push(
-        /* @__PURE__ */ u3("div", { className: classNames2, children: [
-          /* @__PURE__ */ u3("div", { className: web_player_default.playIndicator, children: " " }),
-          /* @__PURE__ */ u3("div", { className: web_player_default.metadata, onClick: () => props.playSong(i4), children: [
-            /* @__PURE__ */ u3("div", { className: web_player_default.title, children: title }),
-            /* @__PURE__ */ u3("div", { className: web_player_default.album, children: album })
+        /* @__PURE__ */ u3("div", { class: classNames2, children: [
+          /* @__PURE__ */ u3("div", { class: web_player_default.playIndicator, children: " " }),
+          /* @__PURE__ */ u3("div", { class: web_player_default.metadata, onClick: () => props.playSong(i4), children: [
+            /* @__PURE__ */ u3("div", { class: web_player_default.title, children: title }),
+            /* @__PURE__ */ u3("div", { class: web_player_default.album, children: album })
           ] }),
           /* @__PURE__ */ u3(
             "div",
             {
-              className: classes([web_player_default.removeBtn, web_player_default.button]),
+              class: classes([web_player_default.removeBtn, web_player_default.button]),
               onClick: () => props.removeSong(i4)
             }
           )
@@ -941,7 +945,7 @@
     }
     if (items.length === 0) {
       items.push(
-        /* @__PURE__ */ u3("div", { className: web_player_default.playlistEmpty, children: [
+        /* @__PURE__ */ u3("div", { class: web_player_default.playlistEmpty, children: [
           /* @__PURE__ */ u3("p", { children: /* @__PURE__ */ u3("strong", { children: "There's nothing in the queue." }) }),
           /* @__PURE__ */ u3("p", { children: 'You can play music by clicking "Play" on any music player, or the plus icon to add it to the end of the queue.' })
         ] })
@@ -952,22 +956,33 @@
       [web_player_default.open]: props.open,
       [web_player_default.closing]: props.closing
     });
-    return /* @__PURE__ */ u3("div", { className: classNames, children: [
-      /* @__PURE__ */ u3("div", { className: web_player_default.playlistTitle, onClick: props.closePanel, children: "Play Queue" }),
-      items
+    return /* @__PURE__ */ u3("div", { class: classNames, children: [
+      /* @__PURE__ */ u3(
+        "div",
+        {
+          class: web_player_default.playlistTitle,
+          "data-tooltip": "Click to close queue",
+          onClick: props.closePanel,
+          children: "Play Queue"
+        }
+      ),
+      /* @__PURE__ */ u3("div", { class: web_player_default.playlistItems, children: items })
     ] });
   };
   var FloatingButton = (props) => {
     const imageSrc = props.nowPlaying?.imageSrc;
+    const isRotating = imageSrc && props.isPlaying;
     const style = {
-      backgroundImage: imageSrc && props.isPlaying ? `url(${imageSrc})` : null
+      backgroundImage: isRotating ? `url(${imageSrc})` : null
     };
     const className = classes({
       [web_player_default.button]: true,
       [web_player_default.floatingButton]: true,
-      [web_player_default.hasImage]: imageSrc && props.isPlaying
+      [web_player_default.left]: true,
+      [web_player_default.hasImage]: isRotating
     });
-    return /* @__PURE__ */ u3("div", { onClick: props.onClick, className, style });
+    const tooltipText = isRotating ? null : props.playPanelOpen ? "Close Player" : "Open Player";
+    return /* @__PURE__ */ u3("div", { "data-tooltip": tooltipText, onClick: props.onClick, class: className, style });
   };
   var setNavigatorPlaybackState = (state) => {
     if (!("mediaSession" in navigator)) return;
@@ -1169,8 +1184,8 @@
     });
     return /* @__PURE__ */ u3(k, { children: [
       /* @__PURE__ */ u3("link", { rel: "stylesheet", type: "text/css", href: props.css }),
-      /* @__PURE__ */ u3("div", { className: web_player_default.container, children: [
-        /* @__PURE__ */ u3("div", { className: playPanelClasses, children: [
+      /* @__PURE__ */ u3("div", { class: web_player_default.container, children: [
+        /* @__PURE__ */ u3("div", { class: playPanelClasses, children: [
           /* @__PURE__ */ u3(NowPlaying, { togglePanel: togglePlaylistPanelOpen, nowPlaying: nowPlaying() }),
           /* @__PURE__ */ u3(
             PlayButtons,
@@ -1209,7 +1224,8 @@
           {
             isPlaying,
             nowPlaying: nowPlaying(),
-            onClick: togglePlayPanelOpen
+            onClick: togglePlayPanelOpen,
+            playPanelOpen
           }
         )
       ] })
