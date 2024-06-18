@@ -165,9 +165,11 @@
 			border-radius: 32px;
 			height: 64px;
 			align-items: center;
-			box-shadow: 0 2px 16px rgba(0, 0, 0, 0.25);
+			color: var(--audio-player-text);
+			border: 2px solid var(--audio-player-controls-border);
 
 			--audio-player-controls-bg: #f9f9f9;
+			--audio-player-controls-border: #ccc;
 			--audio-player-button: #fff;
 			--audio-player-button-hover: #f9f9f9;
 			--audio-player-border: #999;
@@ -177,6 +179,7 @@
 		}
 		.tap--controls.dark {
 			--audio-player-controls-bg: #222;
+			--audio-player-controls-border: #ccc;
 			--audio-player-button: #333;
 			--audio-player-button-hover: #555;
 			--audio-player-border: #aaa;
