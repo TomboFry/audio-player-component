@@ -202,19 +202,20 @@ interface FloatingButtonProps {
 
 const FloatingButton = (props: FloatingButtonProps) => {
 	const imageSrc = props.nowPlaying?.imageSrc;
+	const isRotating = imageSrc && props.isPlaying;
 
 	const style: CSSProperties = {
-		backgroundImage: imageSrc && props.isPlaying ? `url(${imageSrc})` : null,
+		backgroundImage: isRotating ? `url(${imageSrc})` : null,
 	};
 
 	const className = classes({
 		[styles.button]: true,
 		[styles.floatingButton]: true,
 		[styles.left]: true,
-		[styles.hasImage]: imageSrc && props.isPlaying,
+		[styles.hasImage]: isRotating,
 	});
 
-	const tooltipText = props.playPanelOpen ? 'Close Player' : 'Open Player';
+	const tooltipText = isRotating ? null : props.playPanelOpen ? 'Close Player' : 'Open Player';
 
 	return <div data-tooltip={tooltipText} onClick={props.onClick} class={className} style={style} />;
 };
