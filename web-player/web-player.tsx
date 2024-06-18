@@ -188,7 +188,7 @@ const PlaylistPanel = (props: PlaylistProps) => {
 			>
 				Play Queue
 			</div>
-			{items}
+			<div class={styles.playlistItems}>{items}</div>
 		</div>
 	);
 };

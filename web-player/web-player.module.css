@@ -28,12 +28,12 @@
 	border-radius: 50%;
 	box-shadow: 0px 0px 0px transparent;
 	transition: background-color 0.1s, border 0.2s, box-shadow 0.1s;
-}
 
-.button:hover {
-	background-color: var(--button-hover);
-	border: 2px solid var(--border-hover);
-	box-shadow: 0 1px 4px var(--shadow);
+	&:hover {
+		background-color: var(--button-hover);
+		border: 2px solid var(--border-hover);
+		box-shadow: 0 1px 4px var(--shadow);
+	}
 }
 
 .floatingButton {
@@ -47,18 +47,18 @@
 	box-shadow: 0 2px 16px var(--shadow);
 	background-size: cover;
 	background-position: center center;
-}
 
-.floatingButton::before {
-	content: '\1F3B5';
-}
+	&::before {
+		content: '\1F3B5';
+	}
 
-.floatingButton.hasImage {
-	animation: 5s infinite linear spinner;
-}
+	&.hasImage {
+		animation: 5s infinite linear spinner;
 
-.floatingButton.hasImage::before {
-	content: '';
+		&::before {
+			content: '';
+		}
+	}
 }
 
 [data-tooltip] {
@@ -119,18 +119,28 @@
 	background-color: var(--panel);
 	border-top: 2px solid var(--border);
 	align-items: center;
-}
 
-.playPanel.open {
-	display: flex;
+	&.open {
+		display: flex;
+	}
 }
 
 .nowPlaying {
 	display: flex;
+	justify-content: center;
+	align-self: stretch;
 	flex-direction: column;
+	margin-left: -16px;
+	padding-left: 16px;
 	margin-right: 24px;
 	font-size: 16px;
 	width: 320px;
+	cursor: pointer;
+	user-select: none;
+
+	&:hover {
+		background-color: var(--button);
+	}
 }
 
 .metadataTitle,
@@ -155,33 +165,34 @@
 	width: 30px;
 	height: 30px;
 	font-family: 'FontAwesome';
+
+	&.playPauseBtn {
+		width: 48px;
+		height: 48px;
+		margin: 0 4px;
+		font-size: 26px;
+
+		&::before {
+			margin-left: 2px;
+			content: '\f04b';
+		}
+
+		&.playing::before {
+			margin-left: 0;
+			content: '\f04c';
+		}
+
+		&.loading {
+			animation: 1s linear infinite spinner;
+
+			&::before {
+				margin-left: 0;
+				content: '\f110';
+			}
+		}
+	}
 }
 
-.playbackControlButton.playPauseBtn {
-	width: 48px;
-	height: 48px;
-	margin: 0 4px;
-	font-size: 26px;
-}
-
-.playbackControlButton.playPauseBtn::before {
-	margin-left: 2px;
-	content: '\f04b';
-}
-
-.playbackControlButton.playPauseBtn.playing::before {
-	margin-left: 0;
-	content: '\f04c';
-}
-
-.playbackControlButton.playPauseBtn.loading {
-	animation: 1s linear infinite spinner;
-}
-
-.playbackControlButton.playPauseBtn.loading::before {
-	margin-left: 0;
-	content: '\f110';
-}
 
 @keyframes spinner {
 	from {
@@ -218,24 +229,25 @@
 }
 
 .playlistToggleButton {
+	position: relative;
 	width: 30px;
 	height: 30px;
 	margin: 8px;
 	font-size: 16px;
-	font-family: 'FontAwesome';
-}
 
-.playlistToggleButton.open {
-	background-color: var(--primary);
-	color: var(--button);
-}
+	&.open {
+		background-color: var(--primary);
+		color: var(--button);
+	}
 
-.playlistToggleButton::before {
-	content: '\f0cb';
-}
+	&::before {
+		font-family: 'FontAwesome';
+		content: '\f0cb';
+	}
 
-.playlistToggleButton.open::before {
-	content: '\f0d7';
+	&.open::before {
+		content: '\f0d7';
+	}
 }
 
 .playlistPanel {
@@ -252,37 +264,40 @@
 	box-shadow: 0 2px 16px var(--shadow);
 	margin-bottom: 64px;
 	flex-direction: column;
-	overflow-y: scroll;
 
 	animation-duration: 0.16s;
 	animation-iteration-count: 1;
 	animation-timing-function: ease-out;
+
+	&.open {
+		display: flex;
+		bottom: 0;
+		animation-name: playlist-panel-show;
+	}
+
+	&.closing {
+		bottom: -16px;
+		animation-name: playlist-panel-hide;
+	}
 }
 
-.playlistPanel.open {
-	display: block;
-	bottom: 0;
-	animation-name: playlist-panel-show;
-}
-
-.playlistPanel.closing {
-	bottom: -16px;
-	animation-name: playlist-panel-hide;
+.playlistItems {
+	overflow-y: scroll;
 }
 
 .playlistTitle {
 	font-size: 18px;
 	font-weight: 700;
 	padding: 16px;
-	margin-bottom: 16px;
 	background-color: var(--button);
 	cursor: pointer;
+	user-select: none;
 }
 
 .playlistItem {
 	cursor: pointer;
 	width: 100%;
-	padding: 8px;
+	padding: 0 16px;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
@@ -290,15 +305,56 @@
 	flex-direction: row;
 	align-items: center;
 	background-color: var(--panel);
-}
+	user-select: none;
 
-.playlistItem.newItem {
-	animation: 3s playlist-item-add 1;
+	&:hover {
+		background-color: var(--button);
+	}
 
-}
+	&.newItem {
+		animation: 3s playlist-item-add 1;
+	}
 
-.playlistItem:last-of-type {
-	margin-bottom: 8px;
+	&.currentlyPlaying {
+		font-weight: 700;
+
+		& .playIndicator::before {
+			font-family: 'FontAwesome';
+			color: var(--primary);
+			content: '\f04b';
+		}
+	}
+
+	& .playIndicator {
+		width: 20px;
+		margin-right: 6px;
+	}
+
+	& .removeBtn {
+		width: 24px;
+		height: 24px;
+	}
+
+	& .removeBtn::before {
+		font-family: 'FontAwesome';
+		color: var(--negative);
+		content: '\f00d';
+	}
+
+	& .metadata {
+		flex: 1;
+		padding: 10px 0;
+
+		& .title {
+			font-size: 14px;
+			display: block;
+		}
+
+		& .album {
+			font-size: 10px;
+			display: block;
+		}
+	}
 }
 
 @keyframes playlist-item-add {
@@ -311,56 +367,13 @@
 	}
 }
 
-.playlistItem .playIndicator {
-	width: 20px;
-	margin-right: 8px;
-}
-
-.playlistItem .metadata {
-	flex: 1;
-
-	& .title {
-		font-size: 14px;
-	}
-
-	& .album {
-		font-size: 10px;
-	}
-}
-
-.playlistItem .metadata .title,
-.playlistItem .metadata .album {
-	display: block;
-}
-
-.playlistItem.currentlyPlaying {
-	font-weight: 700;
-}
-
-.playlistItem.currentlyPlaying .playIndicator::before {
-	font-family: 'FontAwesome';
-	color: var(--primary);
-	content: '\f04b';
-}
-
-.playlistItem .removeBtn {
-	width: 24px;
-	height: 24px;
-}
-
-.playlistItem .removeBtn::before {
-	font-family: 'FontAwesome';
-	color: var(--negative);
-	content: '\f00d';
-}
-
 .playlistEmpty {
 	padding: 0 16px;
-}
 
-.playlistEmpty p {
-	line-height: 1.4;
-	margin-bottom: 16px;
+	& p {
+		line-height: 1.4;
+		margin-top: 16px;
+	}
 }
 
 .disabled {
