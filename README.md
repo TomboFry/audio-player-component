@@ -121,6 +121,7 @@ exposes some functions you can use to queue/play songs, under
 * `playPause()`
 * `skipBack()`
 * `skipForward()`
+* `clearQueue()`
 
 #### Add To Playlist
 
