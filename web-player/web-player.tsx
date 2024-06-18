@@ -58,10 +58,11 @@ const PlayButtons = (props: PlayButtonsProps) => {
 	};
 	return (
 		<div class={styles.playbackButtons}>
-			<div onClick={props.skipBack} class={classes(classNames)}>
+			<button type="button" onClick={props.skipBack} class={classes(classNames)}>
 				{'\uf049'}
-			</div>
-			<div
+			</button>
+			<button
+				type="button"
 				onClick={props.playPause}
 				class={classes({
 					...classNames,
@@ -70,9 +71,9 @@ const PlayButtons = (props: PlayButtonsProps) => {
 					[styles.playPauseBtn]: true,
 				})}
 			/>
-			<div onClick={props.skipForward} class={classes(classNames)}>
+			<button type="button" onClick={props.skipForward} class={classes(classNames)}>
 				{'\uf050'}
-			</div>
+			</button>
 		</div>
 	);
 };
@@ -117,17 +118,18 @@ const PlaylistToggle = (props: PlaylistToggleProps) => {
 		[styles.open]: props.open,
 	});
 
-	return <div data-tooltip="Open/Close Queue" onClick={props.togglePanel} class={classNames} />;
+	return <button type="button" data-tooltip="Open/Close Queue" onClick={props.togglePanel} class={classNames} />;
 };
 
 interface PlaylistProps {
 	open: boolean;
 	closing: boolean;
 	nowPlayingIndex: number;
+	playlist: PlaylistItem[];
 	closePanel: () => void;
 	playSong: (index: number) => void;
 	removeSong: (index: number) => void;
-	playlist: PlaylistItem[];
+	clearQueue: () => void;
 }
 
 const PlaylistPanel = (props: PlaylistProps) => {
@@ -139,20 +141,25 @@ const PlaylistPanel = (props: PlaylistProps) => {
 
 	const items = [];
 	for (let i = 0; i < props.playlist.length; i++) {
-		const { title, album, src } = props.playlist[i];
+		const { title, album, src, imageSrc } = props.playlist[i];
 		const classNames = classes({
 			[styles.playlistItem]: true,
 			[styles.currentlyPlaying]: props.nowPlayingIndex === i,
 			[styles.newItem]: i >= playlistPreviousLength.current,
 		});
+		const hasImage = imageSrc ? <img src={imageSrc} alt={title} /> : null;
 		items.push(
 			<div key={src} class={classNames}>
 				<div class={styles.playIndicator}> </div>
 				<div class={styles.metadata} onClick={() => props.playSong(i)}>
-					<div class={styles.title}>{title}</div>
-					<div class={styles.album}>{album}</div>
+					{hasImage}
+					<div class={styles.metadataText}>
+						<div class={styles.title}>{title}</div>
+						<div class={styles.album}>{album}</div>
+					</div>
 				</div>
-				<div
+				<button
+					type="button"
 					class={classes([styles.removeBtn, styles.button])}
 					onClick={() => props.removeSong(i)}
 				/>
@@ -181,12 +188,21 @@ const PlaylistPanel = (props: PlaylistProps) => {
 	});
 	return (
 		<div class={classNames}>
-			<div
-				class={styles.playlistTitle}
-				data-tooltip="Click to close queue"
-				onClick={props.closePanel}
-			>
-				Play Queue
+			<div class={styles.playlistHeader}>
+				<div
+					class={styles.playlistTitle}
+					data-tooltip="Click to close queue"
+					onClick={props.closePanel}
+				>
+					Up Next
+				</div>
+				<button
+					type="button"
+					class={classes([styles.button, styles.playlistClear])}
+					onClick={props.clearQueue}
+				>
+					Clear Queue
+				</button>
 			</div>
 			<div class={styles.playlistItems}>{items}</div>
 		</div>
@@ -389,7 +405,7 @@ const Player = (props: PlayerProps) => {
 		setTimeout(() => {
 			setPlaylistPanelClosing(false);
 			setPlaylistPanelOpen(false);
-		}, 150);
+		}, 180);
 	};
 	const togglePlayPanelOpen = () => setPlayPanelOpen(open => !open);
 
@@ -402,6 +418,8 @@ const Player = (props: PlayerProps) => {
 		}
 
 		if (playImmediately) {
+			clearQueue();
+			playlist.length = 0;
 			addToPlaylistAndPlay(json);
 			return;
 		}
@@ -410,10 +428,8 @@ const Player = (props: PlayerProps) => {
 	};
 
 	const addToPlaylist = (items: PlaylistItem | PlaylistItem[]) => {
-		if (playlist.length === 0) {
-			setPlayPanelOpen(true);
-			setPlaylistPanelOpen(true);
-		}
+		setPlayPanelOpen(true);
+		setPlaylistPanelOpen(true);
 		setPlaylist(list => list.concat(items));
 	};
 
@@ -445,6 +461,11 @@ const Player = (props: PlayerProps) => {
 		});
 	};
 
+	const clearQueue = () => {
+		stop();
+		setPlaylist(() => []);
+	};
+
 	// @ts-expect-error
 	window.TomboAudioPlayer = {
 		audio,
@@ -454,6 +475,7 @@ const Player = (props: PlayerProps) => {
 		skipBack,
 		skipForward,
 		loadPlaylistFromJson,
+		clearQueue,
 	};
 
 	const playPanelClasses = classes({
@@ -488,6 +510,7 @@ const Player = (props: PlayerProps) => {
 						removeSong={removeFromPlaylist}
 						nowPlayingIndex={nowPlayingIndex.current}
 						closePanel={togglePlaylistPanelOpen}
+						clearQueue={clearQueue}
 					/>
 				</div>
 				<FloatingButton
